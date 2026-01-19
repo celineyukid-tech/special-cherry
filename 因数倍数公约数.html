@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数学冒险岛 - 倍数与公约数学习游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        #game-container {
+            width: 100%;
+            max-width: 800px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .screen {
+            display: none;
+            padding: 30px;
+            flex-direction: column;
+            height: 100%;
+            min-height: 500px;
+        }
+        
+        .active-screen {
+            display: flex;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #2575fc;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            color: #6a11cb;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        
+        h3 {
+            color: #2575fc;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.2rem;
+        }
+        
+        .content {
+            flex-grow: 1;
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+        
+        .lesson-content {
+            background-color: #f9f9ff;
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 5px solid #6a11cb;
+            margin-bottom: 20px;
+        }
+        
+        .example {
+            background-color: #eef5ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        
+        .example-title {
+            font-weight: bold;
+            color: #2575fc;
+        }
+        
+        .buttons-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 15px 25px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            min-width: 180px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: #f1f1f1;
+            color: #333;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .question-container {
+            background-color: #f9f9ff;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 2px dashed #6a11cb;
+        }
+        
+        .question-text {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .option {
+            padding: 15px;
+            background-color: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1.1rem;
+        }
+        
+        .option:hover {
+            background-color: #eef5ff;
+            border-color: #2575fc;
+        }
+        
+        .option.selected {
+            background-color: #d4edda;
+            border-color: #28a745;
+        }
+        
+        .option.correct {
+            background-color: #d4edda;
+            border-color: #28a745;
+        }
+        
+        .option.wrong {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+        }
+        
+        .feedback {
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+        }
+        
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .feedback.wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            background-color: #f1f1f1;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .level-info, .score-info {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .level-info span, .score-info span {
+            color: #6a11cb;
+        }
+        
+        .progress-container {
+            height: 15px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .completion-screen {
+            text-align: center;
+        }
+        
+        .celebration {
+            font-size: 4rem;
+            margin: 20px 0;
+        }
+        
+        .final-score {
+            font-size: 2.5rem;
+            color: #6a11cb;
+            margin: 20px 0;
+        }
+        
+        .character {
+            font-size: 4rem;
+            margin: 20px 0;
+        }
+        
+        .hint {
+            background-color: #fff3cd;
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border-left: 4px solid #ffc107;
+            font-size: 0.95rem;
+            display: none;
+        }
+        
+        .show-hint-btn {
+            background-color: #ffc107;
+            color: #333;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .options-container {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- 开始屏幕 -->
+        <div id="start-screen" class="screen active-screen">
+            <div class="header">
+                <h1>数学冒险岛</h1>
+                <p class="subtitle">倍数与公约数学习游戏</p>
+                <div class="character">🧮</div>
+            </div>
+            
+            <div class="content">
+                <p>欢迎来到数学冒险岛！在这里你将学习：</p>
+                <ul style="margin: 20px; padding-left: 20px;">
+                    <li>什么是倍数和因数</li>
+                    <li>如何找出一个数的倍数</li>
+                    <li>什么是最小公约数</li>
+                    <li>如何计算两个数的最小公约数</li>
+                </ul>
+                <p>完成所有关卡，成为数学小达人！</p>
+                
+                <div class="lesson-content">
+                    <p>本游戏专为五年级学生设计，通过有趣的关卡帮助掌握100以内的数的常见倍数关系。</p>
+                    <p>每个关卡前都有简单易懂的讲解，帮助你理解概念。</p>
+                </div>
+            </div>
+            
+            <div class="buttons-container">
+                <button class="btn btn-primary" id="start-game-btn">开始游戏</button>
+                <button class="btn btn-secondary" id="instructions-btn">游戏说明</button>
+            </div>
+        </div>
+        
+        <!-- 说明屏幕 -->
+        <div id="instructions-screen" class="screen">
+            <div class="header">
+                <h2>游戏说明</h2>
+            </div>
+            
+            <div class="content">
+                <div class="lesson-content">
+                    <h3>如何玩游戏</h3>
+                    <p>1. 游戏共有4个关卡，难度逐渐增加</p>
+                    <p>2. 每个关卡前会有知识点讲解</p>
+                    <p>3. 回答正确的问题可以获得分数</p>
+                    <p>4. 可以使用"提示"按钮获得帮助</p>
+                    <p>5. 完成所有关卡后可以看到你的得分</p>
+                </div>
+                
+                <div class="lesson-content">
+                    <h3>学习目标</h3>
+                    <p>✓ 理解倍数和因数的概念</p>
+                    <p>✓ 能够找出100以内数的倍数</p>
+                    <p>✓ 理解公约数的概念</p>
+                    <p>✓ 能够计算两个数的最小公约数</p>
+                    <p>✓ 熟练掌握乘法表相关内容</p>
+                </div>
+            </div>
+            
+            <div class="buttons-container">
+                <button class="btn btn-primary" id="back-to-start-btn">返回主菜单</button>
+            </div>
+        </div>
+        
+        <!-- 教学关卡1：倍数 -->
+        <div id="lesson1-screen" class="screen">
+            <div class="header">
+                <h2>第一课：认识倍数</h2>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress1" style="width: 25%"></div>
+                </div>
+            </div>
+            
+            <div class="content">
+                <div class="lesson-content">
+                    <p><strong>倍数的定义：</strong>如果一个数能被另一个数整除，那么这个数就是另一个数的倍数。</p>
+                    
+                    <div class="example">
+                        <p class="example-title">例子：</p>
+                        <p>12 ÷ 3 = 4，没有余数，所以12是3的倍数。</p>
+                        <p>同样，12 ÷ 4 = 3，没有余数，所以12也是4的倍数。</p>
+                    </div>
+                    
+                    <p>我们可以用乘法来找出一个数的倍数：</p>
+                    
+                    <div class="example">
+                        <p class="example-title">找出5的倍数：</p>
+                        <p>5 × 1 = 5，所以5是5的倍数</p>
+                        <p>5 × 2 = 10，所以10是5的倍数</p>
+                        <p>5 × 3 = 15，所以15是5的倍数</p>
+                        <p>5 × 4 = 20，所以20是5的倍数</p>
+                        <p>5、10、15、20……这些都是5的倍数</p>
+                    </div>
+                    
+                    <p>在接下来的练习中，你会练习找出100以内数的倍数。</p>
+                </div>
+            </div>
+            
+            <div class="buttons-container">
+                <button class="btn btn-secondary" id="back-from-lesson1-btn">返回</button>
+                <button class="btn btn-primary" id="start-level1-btn">开始练习</button>
+            </div>
+        </div>
+        
+        <!-- 关卡1：倍数练习 -->
+        <div id="level1-screen" class="screen">
+            <div class="header">
+                <h2>第一关：倍数练习</h2>
+                <div class="game-info">
+                    <div class="level-info">关卡: <span>1/4</span></div>
+                    <div class="score-info">分数: <span id="score1">0</span></div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="level1-progress" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="content">
+                <div class="question-container">
+                    <div class="question-text" id="question1-text">下面哪个数是8的倍数？</div>
+                    
+                    <div class="options-container" id="options1-container">
+                        <!-- 选项将通过JavaScript动态生成 -->
+                    </div>
+                    
+                    <div class="feedback" id="feedback1"></div>
+                    
+                    <div class="hint" id="hint1">
+                        提示：8的倍数可以通过8×1=8，8×2=16，8×3=24...来计算。所以8的倍数有8, 16, 24, 32, 40...
+                    </div>
+                    
+                    <button class="btn show-hint-btn" id="show-hint1-btn">显示提示</button>
+                </div>
+            </div>
+            
+            <div class="buttons-container">
+                <button class="btn btn-secondary" id="back-to-lesson1-btn">返回教学</button>
+                <button class="btn btn-primary" id="check-answer1-btn">检查答案</button>
+                <button class="btn btn-primary" id="next-question1-btn" style="display:none">下一题</button>
+            </div>
+        </div>
+        
+        <!-- 教学关卡2：因数 -->
+        <div id="lesson2-screen" class="screen">
+            <div class="header">
+                <h2>第二课：认识因数</h2>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress2" style="width: 50%"></div>
+                </div>
+            </div>
+            
+            <div class="content">
+                <div class="lesson-content">
+                    <p><strong>因数的定义：</strong>如果一个数能被另一个数整除，那么另一个数就是这个数的因数。</p>
+                    
+                    <div class="example">
+                        <p class="example-title">例子：</p>
+                        <p>12 ÷ 3 = 4，没有余数，所以3是12的因数。</p>
+                        <p>同样，12 ÷ 4 = 3，没有余数，所以4也是12的因数。</p>
+                    </div>
+                    
+                    <p>我们可以通过除法来找出一个数的所有因数：</p>
+                    
+                    <div class="example">
+                        <p class="example-title">找出18的所有因数：</p>
+                        <p>18 ÷ 1 = 18，所以1和18都是18的因数</p>
+                        <p>18 ÷ 2 = 9，所以2和9都是18的因数</p>
+                        <p>18 ÷ 3 = 6，所以3和6都是18的因数</p>
+                        <p>18的因数有：1, 2, 3, 6, 9, 18</p>
+                    </div>
+                    
+                    <p>在接下来的练习中，你会练习找出100以内数的因数。</p>
+                </div>
+            </div>
+            
+            <div class="buttons-container">
+                <button class="btn btn-secondary" id="back-to-level1-btn">返回上一关</button>
+                <button class="btn btn-primary" id="start-level2-btn">开始练习</button>
+            </div>
+        </div>
+        
+        <!-- 关卡2：因数练习 -->
+        <div id="level2-screen" class="screen">
+            <div class="header">
+                <h2>第二关：因数练习</h2>
+                <div class="game-info">
+                    <div class="level-info">关卡: <span>2/4</span></div>
+                    <div class="score-info">分数: <span id="score2">0</span></div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="level2-progress" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="content">
+                <div class="question-container">
+                    <div class="question-text" id="question2-text">下面哪个数是24的因数？</div>
+                    
+                    <div class="options-container" id="options2-container">
+                        <!-- 选项将通过JavaScript动态生成 -->
+                    </div>
+                    
+                    <div class="feedback" id="feedback2"></div>
+                    
+                    <div class="hint" id="hint2">
+                        提示：24的因数是可以整除24的数。我们可以通过24÷1=24，24÷2=12，24÷3=8，24÷4=6来计算。所以24的因数有1, 2, 3, 4, 6, 8, 12, 24。
+                    </div>
+                    
+                    <button class="btn show-hint-btn" id="show-hint2-btn">显示提示</button>
+                </div>
+            </div>
+            
+            <div class="buttons-container">
+                <button class="btn btn-secondary" id="back-to-lesson2-btn">返回教学</button>
+                <button class="btn btn-primary" id="check-answer2-btn">检查答案</button>
+                <button class="btn btn-primary" id="next-question2-btn" style="display:none">下一题</button>
+            </div>
+        </div>
+        
+        <!-- 教学关卡3：最小公约数 -->
+        <div id="lesson3-screen" class="screen">
+            <div class="header">
+                <h2>第三课：认识最小公约数</h2>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress3" style="width: 75%"></div>
+                </div>
+            </div>
+            
+            <div class="content">
+                <div class="lesson-content">
+                    <p><strong>公约数的定义：</strong>两个或多个数公有的因数叫做这几个数的公约数。</p>
+                    
+                    <div class="example">
+                        <p class="example-title">例子：</p>
+                        <p>12的因数有：1, 2, 3, 4, 6, 12</p>
+                        <p>18的因数有：1, 2, 3, 6, 9, 18</p>
+                        <p>12和18公有的因数有：1, 2, 3, 6</p>
+                        <p>所以12和18的公约数是1, 2, 3, 6</p>
+                    </div>
+                    
+                    <p><strong>最小公约数的定义：</strong>两个或多个数的公约数中最小的一个（除了1以外）。</p>
+                    
+                    <div class="example">
+                        <p class="example-title">找出8和12的最小公约数：</p>
+                        <p>8的因数有：1, 2, 4, 8</p>
+                        <p>12的因数有：1, 2, 3, 4, 6, 12</p>
+                        <p>8和12公有的因数有：1, 2, 4</p>
+                        <p>最小的公约数（除了1以外）是2</p>
+                        <p>所以8和12的最小公约数是2</p>
+                    </div>
+                    
+                    <p>在接下来的练习中，你会练习找出两个数的最小公约数。</p>
+                </div>
+            </div>
+            
+            <div class="buttons-container">
+                <button class="btn btn-secondary" id="back-to-level2-btn">返回上一关</button>
+                <button class="btn btn-primary" id="start-level3-btn">开始练习</button>
+            </div>
+        </div>
+        
+        <!-- 关卡3：最小公约数练习 -->
+        <div id="level3-screen" class="screen">
+            <div class="header">
+                <h2>第三关：最小公约数练习</h2>
+                <div class="game-info">
+                    <div class="level-info">关卡: <span>3/4</span></div>
+                    <div class="score-info">分数: <span id="score3">0</span></div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="level3-progress" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="content">
+                <div class="question-container">
+                    <div class="question-text" id="question3-text">12和18的最小公约数是多少？</div>
+                    
+                    <div class="options-container" id="options3-container">
+                        <!-- 选项将通过JavaScript动态生成 -->
+                    </div>
+                    
+                    <div class="feedback" id="feedback3"></div>
+                    
+                    <div class="hint" id="hint3">
+                        提示：先找出12的因数：1, 2, 3, 4, 6, 12。再找出18的因数：1, 2, 3, 6, 9, 18。两个数公有的因数有：1, 2, 3, 6。最小的公约数（除了1以外）是2。
+                    </div>
+                    
+                    <button class="btn show-hint-btn" id="show-hint3-btn">显示提示</button>
+                </div>
+            </div>
+            
+            <div class="buttons-container">
+                <button class="btn btn-secondary" id="back-to-lesson3-btn">返回教学</button>
+                <button class="btn btn-primary" id="check-answer3-btn">检查答案</button>
+                <button class="btn btn-primary" id="next-question3-btn" style="display:none">下一题</button>
+            </div>
+        </div>
+        
+        <!-- 关卡4：综合挑战 -->
+        <div id="level4-screen" class="screen">
+            <div class="header">
+                <h2>第四关：综合挑战</h2>
+                <div class="game-info">
+                    <div class="level-info">关卡: <span>4/4</span></div>
+                    <div class="score-info">分数: <span id="score4">0</span></div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="level4-progress" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="content">
+                <div class="question-container">
+                    <div class="question-text" id="question4-text">下面哪个数是15的倍数，同时也是20的因数？</div>
+                    
+                    <div class="options-container" id="options4-container">
+                        <!-- 选项将通过JavaScript动态生成 -->
+                    </div>
+                    
+                    <div class="feedback" id="feedback4"></div>
+                    
+                    <div class="hint" id="hint4">
+                        提示：先找出15的倍数（15, 30, 45, 60...），再找出20的因数（1, 2, 4, 5, 10, 20）。看看哪个数既是15的倍数又是20的因数。
+                    </div>
+                    
+                    <button class="btn show-hint-btn" id="show-hint4-btn">显示提示</button>
+                </div>
+            </div>
+            
+            <div class="buttons-container">
+                <button class="btn btn-secondary" id="back-to-level3-btn">返回上一关</button>
+                <button class="btn btn-primary" id="check-answer4-btn">检查答案</button>
+                <button class="btn btn-primary" id="next-question4-btn" style="display:none">下一题</button>
+            </div>
+        </div>
+        
+        <!-- 完成屏幕 -->
+        <div id="completion-screen" class="screen">
+            <div class="header">
+                <h2>恭喜完成所有关卡！</h2>
+                <div class="character">🏆</div>
+                <div class="celebration">🎉</div>
+            </div>
+            
+            <div class="content completion-screen">
+                <div class="final-score" id="final-score">你的得分: 0/100</div>
+                
+                <div class="lesson-content" style="text-align: left;">
+                    <p>你已成功完成数学冒险岛的所有挑战！</p>
+                    <p>通过这个游戏，你已经掌握了：</p>
+                    <ul style="margin: 20px; padding-left: 20px;">
+                        <li>倍数的概念和如何找出倍数</li>
+                        <li>因数的概念和如何找出因数</li>
+                        <li>公约数和最小公约数的概念和计算方法</li>
+                        <li>100以内数的常见倍数关系</li>
+                    </ul>
+                    <p>继续练习，你会成为数学小达人！</p>
+                </div>
+            </div>
+            
+            <div class="buttons-container">
+                <button class="btn btn-secondary" id="back-to-level4-btn">返回上一关</button>
+                <button class="btn btn-primary" id="restart-game-btn">重新开始游戏</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 游戏状态
+        const gameState = {
+            currentLevel: 1,
+            currentQuestion: 0,
+            scores: [0, 0, 0, 0], // 每个关卡的分数
+            questions: [
+                // 关卡1: 倍数
+                [
+                    {
+                        question: "下面哪个数是6的倍数？",
+                        options: ["14", "18", "22", "26", "30", "34"],
+                        correct: [1, 4], // 18和30是6的倍数
+                        type: "multiple"
+                    },
+                    {
+                        question: "下面哪个数是9的倍数？",
+                        options: ["27", "36", "45", "54", "63", "70"],
+                        correct: [0, 1, 2, 3, 4], // 27,36,45,54,63是9的倍数
+                        type: "multiple"
+                    },
+                    {
+                        question: "下面哪个数是7的倍数？",
+                        options: ["21", "28", "35", "42", "49", "56"],
+                        correct: [0, 1, 2, 3, 4, 5], // 全部都是7的倍数
+                        type: "multiple"
+                    }
+                ],
+                // 关卡2: 因数
+                [
+                    {
+                        question: "下面哪个数是36的因数？",
+                        options: ["4", "5", "6", "7", "8", "9"],
+                        correct: [0, 2, 5], // 4,6,9是36的因数
+                        type: "multiple"
+                    },
+                    {
+                        question: "下面哪个数是48的因数？",
+                        options: ["3", "6", "8", "12", "16", "24"],
+                        correct: [0, 1, 2, 3, 4, 5], // 全部都是48的因数
+                        type: "multiple"
+                    },
+                    {
+                        question: "下面哪个数是60的因数？",
+                        options: ["5", "10", "15", "20", "25", "30"],
+                        correct: [0, 1, 2, 3], // 5,10,15,20是60的因数
+                        type: "multiple"
+                    }
+                ],
+                // 关卡3: 最小公约数
+                [
+                    {
+                        question: "8和12的最小公约数是多少？",
+                        options: ["1", "2", "3", "4", "6", "8"],
+                        correct: [1], // 2
+                        type: "single"
+                    },
+                    {
+                        question: "9和15的最小公约数是多少？",
+                        options: ["1", "3", "5", "9", "15", "45"],
+                        correct: [1], // 3
+                        type: "single"
+                    },
+                    {
+                        question: "16和24的最小公约数是多少？",
+                        options: ["1", "2", "4", "8", "16", "24"],
+                        correct: [3], // 8
+                        type: "single"
+                    }
+                ],
+                // 关卡4: 综合挑战
+                [
+                    {
+                        question: "下面哪个数是15的倍数，同时也是20的因数？",
+                        options: ["5", "10", "15", "30", "60", "100"],
+                        correct: [0], // 5
+                        type: "single"
+                    },
+                    {
+                        question: "下面哪个数既是8的倍数，又是12的因数？",
+                        options: ["4", "8", "12", "16", "24", "48"],
+                        correct: [2], // 12
+                        type: "single"
+                    },
+                    {
+                        question: "下面哪个数是3和5的公倍数，且小于50？",
+                        options: ["15", "30", "45", "10", "25", "40"],
+                        correct: [0, 1, 2], // 15,30,45
+                        type: "multiple"
+                    }
+                ]
+            ],
+            selectedOptions: []
+        };
+
+        // 音频元素
+        let correctSound, wrongSound, clickSound;
+
+        // 初始化游戏
+        function initGame() {
+            // 创建音频元素
+            correctSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3');
+            wrongSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3');
+            clickSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3');
+            
+            // 设置按钮事件监听器
+            setupEventListeners();
+            
+            // 初始化第一关的问题
+            loadQuestion(1, 0);
+        }
+
+        // 设置所有按钮的事件监听器
+        function setupEventListeners() {
+            // 开始屏幕按钮
+            document.getElementById('start-game-btn').addEventListener('click', startGame);
+            document.getElementById('instructions-btn').addEventListener('click', showInstructions);
+            
+            // 说明屏幕按钮
+            document.getElementById('back-to-start-btn').addEventListener('click', showStartScreen);
+            
+            // 教学关卡1按钮
+            document.getElementById('back-from-lesson1-btn').addEventListener('click', showStartScreen);
+            document.getElementById('start-level1-btn').addEventListener('click', () => startLevel(1));
+            
+            // 关卡1按钮
+            document.getElementById('back-to-lesson1-btn').addEventListener('click', () => showLesson(1));
+            document.getElementById('check-answer1-btn').addEventListener('click', () => checkAnswer(1));
+            document.getElementById('next-question1-btn').addEventListener('click', () => nextQuestion(1));
+            document.getElementById('show-hint1-btn').addEventListener('click', () => toggleHint(1));
+            
+            // 教学关卡2按钮
+            document.getElementById('back-to-level1-btn').addEventListener('click', () => showLevel(1));
+            document.getElementById('start-level2-btn').addEventListener('click', () => startLevel(2));
+            
+            // 关卡2按钮
+            document.getElementById('back-to-lesson2-btn').addEventListener('click', () => showLesson(2));
+            document.getElementById('check-answer2-btn').addEventListener('click', () => checkAnswer(2));
+            document.getElementById('next-question2-btn').addEventListener('click', () => nextQuestion(2));
+            document.getElementById('show-hint2-btn').addEventListener('click', () => toggleHint(2));
+            
+            // 教学关卡3按钮
+            document.getElementById('back-to-level2-btn').addEventListener('click', () => showLevel(2));
+            document.getElementById('start-level3-btn').addEventListener('click', () => startLevel(3));
+            
+            // 关卡3按钮
+            document.getElementById('back-to-lesson3-btn').addEventListener('click', () => showLesson(3));
+            document.getElementById('check-answer3-btn').addEventListener('click', () => checkAnswer(3));
+            document.getElementById('next-question3-btn').addEventListener('click', () => nextQuestion(3));
+            document.getElementById('show-hint3-btn').addEventListener('click', () => toggleHint(3));
+            
+            // 关卡4按钮
+            document.getElementById('back-to-level3-btn').addEventListener('click', () => showLevel(3));
+            document.getElementById('check-answer4-btn').addEventListener('click', () => checkAnswer(4));
+            document.getElementById('next-question4-btn').addEventListener('click', () => nextQuestion(4));
+            document.getElementById('show-hint4-btn').addEventListener('click', () => toggleHint(4));
+            
+            // 完成屏幕按钮
+            document.getElementById('back-to-level4-btn').addEventListener('click', () => showLevel(4));
+            document.getElementById('restart-game-btn').addEventListener('click', restartGame);
+        }
+
+        // 播放音效
+        function playSound(sound) {
+            sound.currentTime = 0;
+            sound.play().catch(e => console.log("音效播放失败:", e));
+        }
+
+        // 显示开始屏幕
+        function showStartScreen() {
+            hideAllScreens();
+            document.getElementById('start-screen').classList.add('active-screen');
+            playSound(clickSound);
+        }
+
+        // 显示游戏说明
+        function showInstructions() {
+            hideAllScreens();
+            document.getElementById('instructions-screen').classList.add('active-screen');
+            playSound(clickSound);
+        }
+
+        // 开始游戏
+        function startGame() {
+            showLesson(1);
+            playSound(clickSound);
+        }
+
+        // 显示教学关卡
+        function showLesson(lessonNumber) {
+            hideAllScreens();
+            document.getElementById(`lesson${lessonNumber}-screen`).classList.add('active-screen');
+            playSound(clickSound);
+        }
+
+        // 显示关卡
+        function showLevel(levelNumber) {
+            hideAllScreens();
+            document.getElementById(`level${levelNumber}-screen`).classList.add('active-screen');
+            playSound(clickSound);
+        }
+
+        // 开始关卡
+        function startLevel(levelNumber) {
+            gameState.currentLevel = levelNumber;
+            gameState.currentQuestion = 0;
+            gameState.selectedOptions = [];
+            loadQuestion(levelNumber, 0);
+            showLevel(levelNumber);
+            playSound(clickSound);
+        }
+
+        // 隐藏所有屏幕
+        function hideAllScreens() {
+            const screens = document.querySelectorAll('.screen');
+            screens.forEach(screen => {
+                screen.classList.remove('active-screen');
+            });
+        }
+
+        // 加载问题
+        function loadQuestion(level, questionIndex) {
+            const levelIndex = level - 1;
+            const question = gameState.questions[levelIndex][questionIndex];
+            
+            // 更新问题文本
+            document.getElementById(`question${level}-text`).textContent = question.question;
+            
+            // 更新进度条
+            const progress = ((questionIndex + 1) / gameState.questions[levelIndex].length) * 100;
+            document.getElementById(`level${level}-progress`).style.width = `${progress}%`;
+            
+            // 生成选项
+            const optionsContainer = document.getElementById(`options${level}-container`);
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.dataset.index = index;
+                
+                optionElement.addEventListener('click', () => {
+                    playSound(clickSound);
+                    selectOption(level, index, question.type);
+                });
+                
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // 重置反馈和按钮状态
+            document.getElementById(`feedback${level}`).style.display = 'none';
+            document.getElementById(`check-answer${level}-btn`).style.display = 'inline-block';
+            document.getElementById(`next-question${level}-btn`).style.display = 'none';
+            document.getElementById(`hint${level}`).style.display = 'none';
+            
+            // 重置选择状态
+            gameState.selectedOptions = [];
+        }
+
+        // 选择选项
+        function selectOption(level, optionIndex, type) {
+            const options = document.querySelectorAll(`#options${level}-container .option`);
+            
+            if (type === 'single') {
+                // 单选：清除所有选择，选择当前项
+                options.forEach(option => {
+                    option.classList.remove('selected');
+                });
+                options[optionIndex].classList.add('selected');
+                gameState.selectedOptions = [optionIndex];
+            } else {
+                // 多选：切换选择状态
+                options[optionIndex].classList.toggle('selected');
+                
+                // 更新已选择的选项
+                gameState.selectedOptions = [];
+                options.forEach((option, index) => {
+                    if (option.classList.contains('selected')) {
+                        gameState.selectedOptions.push(index);
+                    }
+                });
+            }
+        }
+
+        // 检查答案
+        function checkAnswer(level) {
+            const levelIndex = level - 1;
+            const questionIndex = gameState.currentQuestion;
+            const question = gameState.questions[levelIndex][questionIndex];
+            const feedback = document.getElementById(`feedback${level}`);
+            const options = document.querySelectorAll(`#options${level}-container .option`);
+            
+            // 检查是否选择了答案
+            if (gameState.selectedOptions.length === 0) {
+                feedback.textContent = "请先选择一个答案！";
+                feedback.className = "feedback wrong";
+                feedback.style.display = "block";
+                playSound(wrongSound);
+                return;
+            }
+            
+            // 检查答案是否正确
+            let isCorrect = true;
+            
+            // 检查是否选择了所有正确选项，并且没有选择错误选项
+            if (question.correct.length !== gameState.selectedOptions.length) {
+                isCorrect = false;
+            } else {
+                for (let i = 0; i < question.correct.length; i++) {
+                    if (!gameState.selectedOptions.includes(question.correct[i])) {
+                        isCorrect = false;
+                        break;
+                    }
+                }
+            }
+            
+            // 显示正确答案
+            question.correct.forEach(correctIndex => {
+                options[correctIndex].classList.add('correct');
+            });
+            
+            // 显示错误答案
+            gameState.selectedOptions.forEach(selectedIndex => {
+                if (!question.correct.includes(selectedIndex)) {
+                    options[selectedIndex].classList.add('wrong');
+                    isCorrect = false;
+                }
+            });
+            
+            // 显示反馈
+            if (isCorrect) {
+                feedback.textContent = "回答正确！太棒了！";
+                feedback.className = "feedback correct";
+                gameState.scores[levelIndex] += 10;
+                document.getElementById(`score${level}`).textContent = gameState.scores[levelIndex];
+                playSound(correctSound);
+            } else {
+                feedback.textContent = "回答错误，再试一次！";
+                feedback.className = "feedback wrong";
+                playSound(wrongSound);
+            }
+            
+            feedback.style.display = "block";
+            
+            // 更新按钮状态
+            document.getElementById(`check-answer${level}-btn`).style.display = 'none';
+            document.getElementById(`next-question${level}-btn`).style.display = 'inline-block';
+        }
+
+        // 下一题
+        function nextQuestion(level) {
+            const levelIndex = level - 1;
+            gameState.currentQuestion++;
+            
+            // 检查是否还有更多问题
+            if (gameState.currentQuestion < gameState.questions[levelIndex].length) {
+                loadQuestion(level, gameState.currentQuestion);
+            } else {
+                // 检查是否是最后一关
+                if (level < 4) {
+                    // 显示下一个教学关卡
+                    showLesson(level + 1);
+                } else {
+                    // 显示完成屏幕
+                    showCompletionScreen();
+                }
+            }
+            
+            playSound(clickSound);
+        }
+
+        // 切换提示显示
+        function toggleHint(level) {
+            const hint = document.getElementById(`hint${level}`);
+            const hintBtn = document.getElementById(`show-hint${level}-btn`);
+            
+            if (hint.style.display === 'none' || hint.style.display === '') {
+                hint.style.display = 'block';
+                hintBtn.textContent = '隐藏提示';
+            } else {
+                hint.style.display = 'none';
+                hintBtn.textContent = '显示提示';
+            }
+            
+            playSound(clickSound);
+        }
+
+        // 显示完成屏幕
+        function showCompletionScreen() {
+            // 计算总分
+            const totalScore = gameState.scores.reduce((sum, score) => sum + score, 0);
+            document.getElementById('final-score').textContent = `你的得分: ${totalScore}/100`;
+            
+            hideAllScreens();
+            document.getElementById('completion-screen').classList.add('active-screen');
+            playSound(correctSound);
+        }
+
+        // 重新开始游戏
+        function restartGame() {
+            // 重置游戏状态
+            gameState.currentLevel = 1;
+            gameState.currentQuestion = 0;
+            gameState.scores = [0, 0, 0, 0];
+            gameState.selectedOptions = [];
+            
+            // 重置分数显示
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`score${i}`).textContent = '0';
+            }
+            
+            // 重新加载第一题
+            loadQuestion(1, 0);
+            
+            // 显示开始屏幕
+            showStartScreen();
+            playSound(clickSound);
+        }
+
+        // 页面加载完成后初始化游戏
+        window.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
