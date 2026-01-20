@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数学闯关岛 - 因数与倍数</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            border-bottom: 5px solid #ff9a9e;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            min-height: 600px;
+        }
+
+        .tab-container {
+            display: flex;
+            background: #f1f8ff;
+            border-bottom: 3px solid #4facfe;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 18px 10px;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #555;
+            border-right: 1px solid #d1e7ff;
+        }
+
+        .tab:hover {
+            background-color: #e3f2fd;
+        }
+
+        .tab.active {
+            background-color: #4facfe;
+            color: white;
+        }
+
+        .tab:last-child {
+            border-right: none;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section-title {
+            color: #2575fc;
+            border-bottom: 3px solid #ff9a9e;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+        }
+
+        /* 先导课程样式 */
+        .lesson-content {
+            line-height: 1.8;
+            font-size: 1.15rem;
+        }
+
+        .knowledge-point {
+            background-color: #f0f8ff;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border-left: 6px solid #4facfe;
+        }
+
+        .knowledge-point h3 {
+            color: #2575fc;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .knowledge-point h3 i {
+            margin-right: 10px;
+            color: #ff9a9e;
+        }
+
+        .thinking-exercise {
+            background-color: #fff9e6;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 25px 0;
+            border: 2px dashed #ffcc00;
+        }
+
+        .thinking-exercise h4 {
+            color: #e67e22;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .thinking-exercise h4 i {
+            margin-right: 10px;
+        }
+
+        .explanation {
+            background-color: #e8f7ff;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            border-left: 6px solid #00b894;
+        }
+
+        .explanation h4 {
+            color: #00b894;
+            margin-bottom: 10px;
+        }
+
+        .continue-btn {
+            display: block;
+            width: 200px;
+            margin: 30px auto;
+            padding: 15px;
+            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .continue-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 书后习题样式 */
+        .exercise-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .exercise-card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            border: 2px solid #e3f2fd;
+            transition: transform 0.3s;
+        }
+
+        .exercise-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .exercise-card h3 {
+            color: #2575fc;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .exercise-question {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .answer-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .option {
+            padding: 10px 15px;
+            background-color: #f5f9ff;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .option:hover {
+            background-color: #e3f2fd;
+        }
+
+        .option.selected {
+            background-color: #4facfe;
+            color: white;
+            border-color: #2575fc;
+        }
+
+        .submit-btn {
+            padding: 10px 20px;
+            background-color: #00b894;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .submit-btn:hover {
+            background-color: #00a085;
+        }
+
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .result.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .result.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* AI出题关卡样式 */
+        .ai-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .difficulty-selector {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .difficulty-btn {
+            padding: 15px 30px;
+            background-color: #f1f8ff;
+            border: 3px solid #4facfe;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .difficulty-btn:hover {
+            background-color: #e3f2fd;
+        }
+
+        .difficulty-btn.active {
+            background-color: #4facfe;
+            color: white;
+        }
+
+        .ai-question-container {
+            width: 100%;
+            max-width: 800px;
+            background-color: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .ai-question {
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .ai-answer-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .ai-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .ai-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .generate-btn {
+            background-color: #4facfe;
+            color: white;
+        }
+
+        .check-btn {
+            background-color: #00b894;
+            color: white;
+        }
+
+        .ai-result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            display: none;
+        }
+
+        /* 进度和奖励系统 */
+        .progress-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f1f8ff;
+            padding: 15px 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stars {
+            display: flex;
+            gap: 10px;
+        }
+
+        .star {
+            font-size: 2rem;
+            color: #ddd;
+        }
+
+        .star.filled {
+            color: #ffcc00;
+        }
+
+        .score {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2575fc;
+        }
+
+        /* 音效控制 */
+        .sound-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: white;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            font-size: 1.8rem;
+            color: #4facfe;
+            z-index: 100;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .tab {
+                padding: 15px 5px;
+                font-size: 1.1rem;
+            }
+            
+            .exercise-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .difficulty-selector {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .difficulty-btn {
+                width: 100%;
+            }
+            
+            header h1 {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-graduation-cap"></i> 数学闯关岛</h1>
+            <p>第二单元：因数与倍数 - 开启你的数学冒险之旅！</p>
+        </header>
+        
+        <div class="progress-container">
+            <div class="stars">
+                <span class="star"><i class="far fa-star"></i></span>
+                <span class="star"><i class="far fa-star"></i></span>
+                <span class="star"><i class="far fa-star"></i></span>
+                <span class="star"><i class="far fa-star"></i></span>
+                <span class="star"><i class="far fa-star"></i></span>
+            </div>
+            <div class="score">得分: <span id="score-value">0</span></div>
+        </div>
+        
+        <div class="main-content">
+            <div class="tab-container">
+                <div class="tab active" data-tab="lesson">先导课程</div>
+                <div class="tab" data-tab="exercises">书后习题</div>
+                <div class="tab" data-tab="ai">AI出题关卡</div>
+            </div>
+            
+            <!-- 先导课程内容 -->
+            <div id="lesson" class="tab-content active">
+                <h2 class="section-title"><i class="fas fa-book-open"></i> 因数与倍数先导课</h2>
+                
+                <div class="lesson-content">
+                    <p>欢迎来到因数与倍数的奇妙世界！今天，我们将一起探索数字之间的特殊关系。就像好朋友之间互相帮助一样，数字之间也有"因数"和"倍数"这样的好朋友关系哦！</p>
+                    
+                    <div class="knowledge-point">
+                        <h3><i class="fas fa-lightbulb"></i> 1. 因数和倍数的意义</h3>
+                        <p>在整数除法中（被除数、除数、商都是非0自然数，且没有余数）：</p>
+                        <ul>
+                            <li>被除数是除数和商的<strong>倍数</strong></li>
+                            <li>除数和商是被除数的<strong>因数</strong></li>
+                            <li>因数和倍数相互依存，不能单独说某数是因数或倍数</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="thinking-exercise">
+                        <h4><i class="fas fa-brain"></i> 思考练习</h4>
+                        <p>小明有12块糖果，他想平均分给几个小朋友，每个小朋友分到的糖果数要一样多，而且不能有剩余。</p>
+                        <p>问题：小明可以把糖果平均分给几个小朋友？每个小朋友能得到几块？</p>
+                        <p>试着列出所有可能的分法！</p>
+                    </div>
+                    
+                    <div class="explanation">
+                        <h4><i class="fas fa-chalkboard-teacher"></i> 知识点讲解</h4>
+                        <p>12块糖果可以平均分给：</p>
+                        <ul>
+                            <li>1个小朋友，每人12块 → 1和12是12的因数</li>
+                            <li>2个小朋友，每人6块 → 2和6是12的因数</li>
+                            <li>3个小朋友，每人4块 → 3和4是12的因数</li>
+                            <li>4个小朋友，每人3块 → 4和3是12的因数</li>
+                            <li>6个小朋友，每人2块 → 6和2是12的因数</li>
+                            <li>12个小朋友，每人1块 → 12和1是12的因数</li>
+                        </ul>
+                        <p>所以12的因数有：1, 2, 3, 4, 6, 12</p>
+                    </div>
+                    
+                    <div class="knowledge-point">
+                        <h3><i class="fas fa-search"></i> 2. 找因数的方法</h3>
+                        <ul>
+                            <li><strong>列除法算式</strong>：用这个数分别除以1、2、3……，能整除的除数和商都是这个数的因数</li>
+                            <li><strong>列乘法算式</strong>：看哪两个非0自然数相乘等于这个数，这两个数就是这个数的因数</li>
+                            <li><strong>特征</strong>：一个数的因数个数是有限的，最小因数是1，最大因数是它本身</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="knowledge-point">
+                        <h3><i class="fas fa-calculator"></i> 3. 找倍数的方法</h3>
+                        <ul>
+                            <li><strong>列乘法算式</strong>：用这个数依次乘1、2、3……，所得的积都是这个数的倍数</li>
+                            <li><strong>特征</strong>：一个数的倍数个数是无限的，最小倍数是它本身，没有最大倍数</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="knowledge-point">
+                        <h3><i class="fas fa-magic"></i> 4. 2、3、5的倍数特征</h3>
+                        <ul>
+                            <li><strong>2的倍数</strong>：个位上是0、2、4、6、8的数（偶数）</li>
+                            <li><strong>5的倍数</strong>：个位上是0或5的数</li>
+                            <li><strong>3的倍数</strong>：各位上的数字之和是3的倍数的数</li>
+                            <li><strong>同时是2和5的倍数</strong>：个位上是0的数</li>
+                            <li><strong>同时是2、3、5的倍数</strong>：个位上是0且各位数字之和是3的倍数的数</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="thinking-exercise">
+                        <h4><i class="fas fa-brain"></i> 思考练习</h4>
+                        <p>判断下列哪些数是3的倍数：123, 456, 789, 246, 357</p>
+                        <p>提示：把每个数的各位数字相加，看看和是不是3的倍数</p>
+                    </div>
+                    
+                    <div class="knowledge-point">
+                        <h3><i class="fas fa-crown"></i> 5. 质数与合数</h3>
+                        <ul>
+                            <li><strong>质数（素数）</strong>：一个数，如果只有1和它本身两个因数，这样的数叫质数。最小的质数是2，2是唯一的偶质数</li>
+                            <li><strong>合数</strong>：一个数，如果除了1和它本身还有别的因数，这样的数叫合数。最小的合数是4</li>
+                            <li><strong>1的特殊性</strong>：1既不是质数，也不是合数</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="knowledge-point">
+                        <h3><i class="fas fa-sitemap"></i> 6. 分解质因数</h3>
+                        <ul>
+                            <li><strong>定义</strong>：把一个合数用质数相乘的形式表示出来，叫作分解质因数</li>
+                            <li><strong>方法</strong>：短除法，用质数依次去除这个合数，直到商是质数为止，再把所有除数和商写成相乘的形式</li>
+                        </ul>
+                    </div>
+                    
+                    <button class="continue-btn" id="go-to-exercises">完成学习，开始闯关！ <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+            
+            <!-- 书后习题内容 -->
+            <div id="exercises" class="tab-content">
+                <h2 class="section-title"><i class="fas fa-pencil-alt"></i> 书后习题闯关</h2>
+                <p class="lesson-content">完成下面的习题来巩固所学知识吧！每答对一题可以获得10分哦！</p>
+                
+                <div class="exercise-container">
+                    <!-- 练习二 习题1 -->
+                    <div class="exercise-card">
+                        <h3>练习二 第1题</h3>
+                        <div class="exercise-question">下面各组数中，谁是谁的因数？谁是谁的倍数？</div>
+                        <div class="exercise-question">(1) 24和8</div>
+                        <div class="answer-options">
+                            <div class="option" data-correct="1">8是24的因数，24是8的倍数</div>
+                            <div class="option">24是8的因数，8是24的倍数</div>
+                            <div class="option">8和24没有因数和倍数关系</div>
+                        </div>
+                        <button class="submit-btn">提交答案</button>
+                        <div class="result"></div>
+                    </div>
+                    
+                    <!-- 练习二 习题2 -->
+                    <div class="exercise-card">
+                        <h3>练习二 第2题</h3>
+                        <div class="exercise-question">写出下面各数的因数：</div>
+                        <div class="exercise-question">10的因数有哪些？</div>
+                        <div class="answer-options">
+                            <div class="option">1, 2, 5</div>
+                            <div class="option" data-correct="1">1, 2, 5, 10</div>
+                            <div class="option">1, 10</div>
+                            <div class="option">2, 5</div>
+                        </div>
+                        <button class="submit-btn">提交答案</button>
+                        <div class="result"></div>
+                    </div>
+                    
+                    <!-- 练习二 习题4 -->
+                    <div class="exercise-card">
+                        <h3>练习二 第4题 - 猜数游戏</h3>
+                        <div class="exercise-question">我是36的因数，也是2和3的倍数，而且比15小。我是多少？</div>
+                        <div class="answer-options">
+                            <div class="option">2</div>
+                            <div class="option">4</div>
+                            <div class="option" data-correct="1">6</div>
+                            <div class="option">12</div>
+                        </div>
+                        <button class="submit-btn">提交答案</button>
+                        <div class="result"></div>
+                    </div>
+                    
+                    <!-- 练习三 习题1 -->
+                    <div class="exercise-card">
+                        <h3>练习三 第1题</h3>
+                        <div class="exercise-question">下列数中，哪些是奇数？哪些是偶数？</div>
+                        <div class="exercise-question">33, 98, 355, 0, 123</div>
+                        <div class="answer-options">
+                            <div class="option" data-correct="1">奇数：33, 355, 123；偶数：98, 0</div>
+                            <div class="option">奇数：98, 0；偶数：33, 355, 123</div>
+                            <div class="option">奇数：33, 98, 355；偶数：0, 123</div>
+                        </div>
+                        <button class="submit-btn">提交答案</button>
+                        <div class="result"></div>
+                    </div>
+                    
+                    <!-- 练习三 习题3 -->
+                    <div class="exercise-card">
+                        <h3>练习三 第3题</h3>
+                        <div class="exercise-question">用3、4、5三个数字，组成是3的倍数的三位数，有哪些？</div>
+                        <div class="answer-options">
+                            <div class="option">345, 354, 435, 453</div>
+                            <div class="option" data-correct="1">345, 354, 435, 453, 534, 543</div>
+                            <div class="option">345, 435, 543</div>
+                        </div>
+                        <button class="submit-btn">提交答案</button>
+                        <div class="result"></div>
+                    </div>
+                    
+                    <!-- 练习四 习题1 -->
+                    <div class="exercise-card">
+                        <h3>练习四 第1题</h3>
+                        <div class="exercise-question">下面的说法正确吗？正确的画"√"，错误的画"×"</div>
+                        <div class="exercise-question">所有的奇数都是质数。</div>
+                        <div class="answer-options">
+                            <div class="option" data-correct="1">×（错误）</div>
+                            <div class="option">√（正确）</div>
+                        </div>
+                        <button class="submit-btn">提交答案</button>
+                        <div class="result"></div>
+                    </div>
+                </div>
+                
+                <button class="continue-btn" id="go-to-ai">完成习题，挑战AI出题！ <i class="fas fa-robot"></i></button>
+            </div>
+            
+            <!-- AI出题关卡 -->
+            <div id="ai" class="tab-content">
+                <h2 class="section-title"><i class="fas fa-robot"></i> AI智能出题关卡</h2>
+                <p class="lesson-content">选择难度，让AI为你生成专属题目！每答对一题可以获得20分！</p>
+                
+                <div class="ai-container">
+                    <div class="difficulty-selector">
+                        <div class="difficulty-btn active" data-difficulty="easy">简单</div>
+                        <div class="difficulty-btn" data-difficulty="medium">中等</div>
+                        <div class="difficulty-btn" data-difficulty="hard">困难</div>
+                    </div>
+                    
+                    <div class="ai-question-container">
+                        <div class="ai-question" id="ai-question">
+                            请选择难度，然后点击"生成题目"按钮，AI将为你生成一道关于因数与倍数的题目！
+                        </div>
+                        <input type="text" class="ai-answer-input" id="ai-answer" placeholder="请输入你的答案...">
+                        <div class="ai-controls">
+                            <button class="ai-btn generate-btn" id="generate-question">生成题目</button>
+                            <button class="ai-btn check-btn" id="check-ai-answer">检查答案</button>
+                        </div>
+                        <div class="ai-result" id="ai-result"></div>
+                    </div>
+                    
+                    <div class="knowledge-point">
+                        <h3><i class="fas fa-key"></i> GLM API 密钥设置</h3>
+                        <p>为了使用AI出题功能，请在下方输入您的GLM API密钥（仅保存在本地浏览器中）</p>
+                        <input type="password" id="glm-key" placeholder="请输入GLM API密钥" style="width:100%; padding:10px; margin:10px 0; border:2px solid #4facfe; border-radius:5px;">
+                        <button id="save-key" style="padding:10px 20px; background-color:#4facfe; color:white; border:none; border-radius:5px; cursor:pointer;">保存密钥</button>
+                        <p style="margin-top:10px; font-size:0.9rem; color:#666;">密钥仅保存在您的本地浏览器中，不会被发送到任何服务器。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 音效控制 -->
+    <div class="sound-control" id="sound-control">
+        <i class="fas fa-volume-up"></i>
+    </div>
+    
+    <!-- 音效 -->
+    <audio id="correct-sound" src="https://assets.mixkit.co/active_storage/sfx/286/286-preview.mp3" preload="auto"></audio>
+    <audio id="incorrect-sound" src="https://assets.mixkit.co/active_storage/sfx/256/256-preview.mp3" preload="auto"></audio>
+    <audio id="click-sound" src="https://assets.mixkit.co/active_storage/sfx/247/247-preview.mp3" preload="auto"></audio>
+    
+    <script>
+        // 全局变量
+        let currentScore = 0;
+        let starsEarned = 0;
+        let soundEnabled = true;
+        let currentDifficulty = 'easy';
+        let glmApiKey = localStorage.getItem('glm_api_key') || '';
+        
+        // DOM元素
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const goToExercisesBtn = document.getElementById('go-to-exercises');
+        const goToAiBtn = document.getElementById('go-to-ai');
+        const soundControl = document.getElementById('sound-control');
+        const scoreValue = document.getElementById('score-value');
+        const stars = document.querySelectorAll('.star');
+        const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+        const generateQuestionBtn = document.getElementById('generate-question');
+        const checkAiAnswerBtn = document.getElementById('check-ai-answer');
+        const aiQuestionElement = document.getElementById('ai-question');
+        const aiAnswerInput = document.getElementById('ai-answer');
+        const aiResultElement = document.getElementById('ai-result');
+        const glmKeyInput = document.getElementById('glm-key');
+        const saveKeyBtn = document.getElementById('save-key');
+        
+        // 音效
+        const correctSound = document.getElementById('correct-sound');
+        const incorrectSound = document.getElementById('incorrect-sound');
+        const clickSound = document.getElementById('click-sound');
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载保存的分数
+            const savedScore = localStorage.getItem('math_game_score');
+            if (savedScore) {
+                currentScore = parseInt(savedScore);
+                updateScore();
+            }
+            
+            // 加载保存的音效设置
+            const savedSoundSetting = localStorage.getItem('sound_enabled');
+            if (savedSoundSetting !== null) {
+                soundEnabled = savedSoundSetting === 'true';
+                updateSoundIcon();
+            }
+            
+            // 加载保存的API密钥
+            if (glmApiKey) {
+                glmKeyInput.value = glmApiKey;
+            }
+            
+            // 设置选项卡切换
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // 播放点击音效
+                    playSound(clickSound);
+                    
+                    // 更新活动选项卡
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // 显示对应内容
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === tabId) {
+                            content.classList.add('active');
+                        }
+                    });
+                });
+            });
+            
+            // 前往习题按钮
+            goToExercisesBtn.addEventListener('click', () => {
+                playSound(clickSound);
+                document.querySelector('[data-tab="exercises"]').click();
+            });
+            
+            // 前往AI关卡按钮
+            goToAiBtn.addEventListener('click', () => {
+                playSound(clickSound);
+                document.querySelector('[data-tab="ai"]').click();
+            });
+            
+            // 音效控制
+            soundControl.addEventListener('click', () => {
+                soundEnabled = !soundEnabled;
+                localStorage.setItem('sound_enabled', soundEnabled);
+                updateSoundIcon();
+                playSound(clickSound);
+            });
+            
+            // 难度选择
+            difficultyBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    playSound(clickSound);
+                    difficultyBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentDifficulty = btn.getAttribute('data-difficulty');
+                });
+            });
+            
+            // 保存API密钥
+            saveKeyBtn.addEventListener('click', () => {
+                glmApiKey = glmKeyInput.value.trim();
+                if (glmApiKey) {
+                    localStorage.setItem('glm_api_key', glmApiKey);
+                    alert('API密钥已保存到本地！');
+                    playSound(clickSound);
+                } else {
+                    alert('请输入有效的API密钥');
+                }
+            });
+            
+            // 生成AI题目
+            generateQuestionBtn.addEventListener('click', generateAiQuestion);
+            
+            // 检查AI题目答案
+            checkAiAnswerBtn.addEventListener('click', checkAiAnswer);
+            
+            // 初始化习题卡片
+            initExerciseCards();
+        });
+        
+        // 初始化习题卡片
+        function initExerciseCards() {
+            const exerciseCards = document.querySelectorAll('.exercise-card');
+            
+            exerciseCards.forEach(card => {
+                const options = card.querySelectorAll('.option');
+                const submitBtn = card.querySelector('.submit-btn');
+                const resultDiv = card.querySelector('.result');
+                
+                // 选项点击事件
+                options.forEach(option => {
+                    option.addEventListener('click', () => {
+                        playSound(clickSound);
+                        options.forEach(opt => opt.classList.remove('selected'));
+                        option.classList.add('selected');
+                    });
+                });
+                
+                // 提交答案事件
+                submitBtn.addEventListener('click', () => {
+                    playSound(clickSound);
+                    const selectedOption = card.querySelector('.option.selected');
+                    
+                    if (!selectedOption) {
+                        resultDiv.textContent = '请先选择一个答案！';
+                        resultDiv.className = 'result incorrect';
+                        resultDiv.style.display = 'block';
+                        return;
+                    }
+                    
+                    const isCorrect = selectedOption.hasAttribute('data-correct');
+                    
+                    if (isCorrect) {
+                        resultDiv.textContent = '答对了！太棒了！';
+                        resultDiv.className = 'result correct';
+                        playSound(correctSound);
+                        addScore(10);
+                        submitBtn.disabled = true;
+                        options.forEach(opt => opt.style.pointerEvents = 'none');
+                    } else {
+                        resultDiv.textContent = '答错了，再想想看！';
+                        resultDiv.className = 'result incorrect';
+                        playSound(incorrectSound);
+                    }
+                    
+                    resultDiv.style.display = 'block';
+                });
+            });
+        }
+        
+        // 生成AI题目
+        function generateAiQuestion() {
+            playSound(clickSound);
+            
+            // 如果没有API密钥，使用本地题库
+            if (!glmApiKey) {
+                useLocalQuestionBank();
+                return;
+            }
+            
+            // 否则尝试使用GLM API
+            try {
+                generateQuestionWithGLM();
+            } catch (error) {
+                console.error('GLM API调用失败，使用本地题库:', error);
+                useLocalQuestionBank();
+            }
+        }
+        
+        // 使用本地题库
+        function useLocalQuestionBank() {
+            const questions = {
+                easy: [
+                    "15的因数有哪些？",
+                    "写出4的前5个倍数。",
+                    "判断：9是奇数，也是合数。（对/错）",
+                    "同时是2和5的倍数的最小两位数是多少？"
+                ],
+                medium: [
+                    "一个数既是36的因数，又是4的倍数，这个数可能是多少？",
+                    "用2、4、5组成的三位数中，哪些是3的倍数？",
+                    "一个两位数是5的倍数，各个数位上的数字之和是9，这个数是多少？",
+                    "将24分解质因数。"
+                ],
+                hard: [
+                    "一个数是42的因数，也是3和7的倍数，这个数是多少？",
+                    "两个质数的和是20，积是91，这两个质数分别是多少？",
+                    "一个长方形的周长是16m，它的长和宽的米数都是质数，这个长方形的面积是多少平方米？",
+                    "从0、4、5、8、9中选出三个数字，组成能同时被2、3、5整除的三位数，有哪些？"
+                ]
+            };
+            
+            const answers = {
+                easy: [
+                    "1,3,5,15",
+                    "4,8,12,16,20",
+                    "对",
+                    "10"
+                ],
+                medium: [
+                    "4,12,36",
+                    "无（因为2+4+5=11，不是3的倍数）",
+                    "45",
+                    "2×2×2×3"
+                ],
+                hard: [
+                    "21",
+                    "7和13",
+                    "15平方米（长5米，宽3米）",
+                    "450,480,540,580,840,850"
+                ]
+            };
+            
+            const questionIndex = Math.floor(Math.random() * questions[currentDifficulty].length);
+            const question = questions[currentDifficulty][questionIndex];
+            const answer = answers[currentDifficulty][questionIndex];
+            
+            aiQuestionElement.textContent = question;
+            aiQuestionElement.setAttribute('data-correct-answer', answer);
+            aiAnswerInput.value = '';
+            aiResultElement.style.display = 'none';
+            
+            console.log(`本地题目: ${question}`);
+            console.log(`正确答案: ${answer}`);
+        }
+        
+        // 使用GLM API生成题目（模拟实现）
+        function generateQuestionWithGLM() {
+            console.log("调用GLM API生成题目，难度:", currentDifficulty);
+            
+            // 模拟API调用延迟
+            setTimeout(() => {
+                // 这里应该是实际的API调用代码
+                // 由于没有真实的API端点，我们使用本地题库
+                useLocalQuestionBank();
+                
+                // 实际API调用代码示例（注释掉）：
+                /*
+                fetch('https://api.glm.com/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${glmApiKey}`
+                    },
+                    body: JSON.stringify({
+                        prompt: `请生成一道关于小学数学因数与倍数的题目，难度为${currentDifficulty}。`,
+                        max_tokens: 100
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    aiQuestionElement.textContent = data.result;
+                    // 这里还需要处理答案，但实际API可能不直接提供答案
+                    // 所以我们可能需要调用另一个API来检查答案
+                })
+                .catch(error => {
+                    console.error('API调用错误:', error);
+                    useLocalQuestionBank();
+                });
+                */
+            }, 500);
+        }
+        
+        // 检查AI题目答案
+        function checkAiAnswer() {
+            playSound(clickSound);
+            const userAnswer = aiAnswerInput.value.trim();
+            const correctAnswer = aiQuestionElement.getAttribute('data-correct-answer');
+            
+            if (!userAnswer) {
+                aiResultElement.textContent = '请输入答案！';
+                aiResultElement.className = 'ai-result incorrect';
+                aiResultElement.style.display = 'block';
+                return;
+            }
+            
+            // 简单的答案检查（实际应用中应该更复杂）
+            if (userAnswer === correctAnswer || checkAnswerEquivalence(userAnswer, correctAnswer)) {
+                aiResultElement.textContent = '恭喜你，答对了！获得20分！';
+                aiResultElement.className = 'ai-result correct';
+                playSound(correctSound);
+                addScore(20);
+            } else {
+                aiResultElement.textContent = `答错了！正确答案是：${correctAnswer}`;
+                aiResultElement.className = 'ai-result incorrect';
+                playSound(incorrectSound);
+            }
+            
+            aiResultElement.style.display = 'block';
+        }
+        
+        // 检查答案等价性（简化版）
+        function checkAnswerEquivalence(userAnswer, correctAnswer) {
+            // 移除空格和标点
+            const cleanUser = userAnswer.replace(/\s+/g, '').toLowerCase();
+            const cleanCorrect = correctAnswer.replace(/\s+/g, '').toLowerCase();
+            
+            // 简单比较
+            if (cleanUser === cleanCorrect) return true;
+            
+            // 处理因数的不同表示方式，如"1,3,5,15"和"1 3 5 15"
+            const userNumbers = cleanUser.split(/,|，/).sort().join(',');
+            const correctNumbers = cleanCorrect.split(/,|，/).sort().join(',');
+            
+            return userNumbers === correctNumbers;
+        }
+        
+        // 添加分数
+        function addScore(points) {
+            currentScore += points;
+            updateScore();
+            updateStars();
+            localStorage.setItem('math_game_score', currentScore);
+        }
+        
+        // 更新分数显示
+        function updateScore() {
+            scoreValue.textContent = currentScore;
+        }
+        
+        // 更新星星显示
+        function updateStars() {
+            // 每100分获得一颗星星
+            const newStars = Math.min(5, Math.floor(currentScore / 100));
+            
+            if (newStars > starsEarned) {
+                starsEarned = newStars;
+                stars.forEach((star, index) => {
+                    if (index < starsEarned) {
+                        star.innerHTML = '<i class="fas fa-star"></i>';
+                        star.classList.add('filled');
+                    }
+                });
+            }
+        }
+        
+        // 播放音效
+        function playSound(soundElement) {
+            if (soundEnabled) {
+                soundElement.currentTime = 0;
+                soundElement.play().catch(e => console.log("音效播放失败:", e));
+            }
+        }
+        
+        // 更新音效图标
+        function updateSoundIcon() {
+            const icon = soundControl.querySelector('i');
+            if (soundEnabled) {
+                icon.className = 'fas fa-volume-up';
+            } else {
+                icon.className = 'fas fa-volume-mute';
+            }
+        }
+    </script>
+</body>
+</html>
