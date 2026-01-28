@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>汉字学习游戏 · M1</title>
+  <link rel="stylesheet" href="./modules/M1_LearnChar/LearnChar.css" />
+</head>
+<body>
+
+<script>
+  window.gameState = {
+    coins: 0
+  };
+</script>
+
+<script>
+  window.charList = ["⺀", "人", "大"];
+  window.currentCharIndex = 0;
+</script>
+
+<script>
+  window.gameState = {
+    coins: 0
+  };
+</script>
+
+
+ <h2>M1 LearnChar</h2>
+
+  <!-- 上半屏：示范 -->
+  <div id="demo-area"></div>
+
+  <hr />
+
+  <!-- 下半屏：练习 -->
+  <div id="practice-area"></div>
+
+
+  <script src="./modules/M1_LearnChar/LearnChar.js"></script>
+  <script src="./modules/M2_Practice/PracticeCanvas.js"></script>
+
+</body>
+</html>

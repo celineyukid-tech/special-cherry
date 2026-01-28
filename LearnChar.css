@@ -1,0 +1,28 @@
+.learn-char-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-family: "KaiTi", "楷体", serif;
+}
+
+.demo-area,
+.practice-area {
+  flex: 1;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.demo-area {
+  border-bottom: 2px solid #ddd;
+}
+
+#char-demo {
+  font-size: 120px;
+  text-align: center;
+  margin: 20px 0;
+}
+
+#write-canvas {
+  border: 2px dashed #aaa;
+  touch-action: none;
+}
