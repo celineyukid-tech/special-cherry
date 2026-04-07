@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>儿童汉字练习 - 错词循环练习</title>
+<style>
+  body { font-family: "Microsoft YaHei", sans-serif; padding: 10px; background: #f9f9f9; }
+  h2 { text-align: center; margin-bottom: 10px; }
+  #inputArea, #displayArea, #practiceArea, #reviewArea { margin: 10px 0; }
+  textarea { width: 100%; height: 80px; font-size: 18px; padding: 5px; }
+  button { font-size: 18px; margin: 5px; padding: 8px 12px; cursor: pointer; }
+  .wordDisplay, .wordPractice, .reviewWord { text-align:center; margin-bottom:15px; display:flex; flex-wrap:wrap; justify-content:center; position:relative; }
+  .displayWord { font-size:24px; margin-top:5px; width:100%; }
+  canvas { border:1px solid #333; background:#fff; touch-action:none; margin:3px; display: block; }
+  .canvas-wrapper { position: relative; display: inline-block; margin: 3px; }
+  .mark-overlay { position: absolute; top: 2px; right: 2px; font-size: 22px; font-weight: bold; background: rgba(255,255,200,0.85); border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 10; }
+  .pinyin { font-size:20px; color:#007BFF; margin-bottom:5px; width:120px; text-align:center; }
+  .eraserBtn { font-size:18px; cursor:pointer; margin-top:5px; text-align:center; width:120px; background: #f0f0f0; border-radius: 20px; padding: 4px; user-select: none; display: inline-block; }
+  .char-card { display: inline-block; margin: 8px 5px; text-align: center; vertical-align: top; }
+  .review-char-card { display: inline-block; margin: 5px; text-align: center; vertical-align: top; position: relative; }
+  .review-buttons { margin-top: 12px; text-align: center; width: 100%; clear: both; }
+  .word-buttons { margin-top: 8px; text-align: center; }
+  .correct-word-btn, .wrong-word-btn { font-size: 20px; margin: 0 8px; padding: 4px 16px; cursor: pointer; border-radius: 28px; border: none; background: #e0e0e0; transition: 0.2s; }
+  .correct-word-btn:hover { background: #8bc34a; }
+  .wrong-word-btn:hover { background: #ffab91; }
+  .global-continue { font-size: 22px; margin-top: 20px; padding: 10px 24px; background: #4caf50; color: white; border: none; border-radius: 40px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<h2>儿童汉字练习</h2>
+
+<div id="inputArea">
+  <h3>家长输入今天的词语（每行一个）</h3>
+  <textarea id="wordInput" placeholder="例如：电脑&#10;学校"></textarea><br>
+  <button id="generateDisplayBtn">生成学习内容</button>
+</div>
+
+<div id="displayArea" style="display:none;">
+  <h3>今天要学习的词语</h3>
+  <div id="displayWords"></div>
+  <button id="startPracticeBtn">开始练习</button>
+</div>
+
+<div id="practiceArea" style="display:none;">
+  <div id="practiceWords"></div>
+  <button id="submitAll">提交批改</button>
+</div>
+
+<div id="reviewArea" style="display:none;">
+  <h3>人工批改 (点击下方按钮标记每个词语的正确/错误，标记后田字格右上角显示✅或❌)</h3>
+  <div id="reviewWords"></div>
+</div>
+
+<script src="https://unpkg.com/pinyin-pro@3.19.6/dist/index.js"></script>
+<script>
+const wordInput = document.getElementById("wordInput");
+const generateDisplayBtn = document.getElementById("generateDisplayBtn");
+const displayArea = document.getElementById("displayArea");
+const displayWordsDiv = document.getElementById("displayWords");
+const startPracticeBtn = document.getElementById("startPracticeBtn");
+
+const practiceArea = document.getElementById("practiceArea");
+const practiceWordsDiv = document.getElementById("practiceWords");
+const submitAllBtn = document.getElementById("submitAll");
+
+const reviewArea = document.getElementById("reviewArea");
+const reviewWordsDiv = document.getElementById("reviewWords");
+
+let wordList = [];        // 存储词语对象 {word, pinyin, status} status: 'pending' 未正确, 'done' 已掌握
+
+// 获取单字拼音
+function getPinyin(text){
+  if(window.pinyinPro){
+    return window.pinyinPro.pinyin(text, {toneType:'symbol', type:'array'});
+  }
+  return Array.from(text).map(()=>"");
+}
+
+// 画米字格
+function drawGrid(ctx, width, height){
+  ctx.clearRect(0,0,width,height);
+  ctx.strokeStyle="#ccc";
+  ctx.lineWidth=1;
+  ctx.strokeRect(0,0,width,height);
+  ctx.beginPath();
+  ctx.moveTo(width/2,0); ctx.lineTo(width/2,height);
+  ctx.moveTo(0,height/2); ctx.lineTo(width,height/2);
+  ctx.moveTo(0,0); ctx.lineTo(width,height);
+  ctx.moveTo(width,0); ctx.lineTo(0,height);
+  ctx.stroke();
+}
+
+// 清除画布笔迹
+function clearCanvasDrawing(canvas) {
+  const ctx = canvas.getContext("2d");
+  drawGrid(ctx, canvas.width, canvas.height);
+}
+
+// 初始化canvas手写
+function initCanvas(canvas){
+  const ctx = canvas.getContext("2d");
+  drawGrid(ctx,canvas.width,canvas.height);
+  ctx.lineWidth=3;
+  ctx.lineCap='round';
+  let drawing=false;
+  let lastX=0,lastY=0;
+  function start(e){
+    drawing=true;
+    const rect=canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    lastX=clientX - rect.left;
+    lastY=clientY - rect.top;
+  }
+  function move(e){
+    if(!drawing) return;
+    e.preventDefault();
+    const rect=canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const x=clientX - rect.left;
+    const y=clientY - rect.top;
+    ctx.beginPath();
+    ctx.moveTo(lastX,lastY);
+    ctx.lineTo(x,y);
+    ctx.stroke();
+    lastX=x; lastY=y;
+  }
+  function end(){drawing=false;}
+  canvas.addEventListener("mousedown",start);
+  canvas.addEventListener("touchstart",start);
+  canvas.addEventListener("mousemove",move);
+  canvas.addEventListener("touchmove",move);
+  canvas.addEventListener("mouseup",end);
+  canvas.addEventListener("mouseleave",end);
+  canvas.addEventListener("touchend",end);
+}
+
+// 为批改页面中某个词语的所有汉字图片添加/更新右上角标记（基于包装后的img）
+function updateWordMarks(wordObj, markType) {
+  // 找到该词语所在的reviewWord容器
+  let targetDiv = null;
+  for (let div of reviewWordsDiv.querySelectorAll('.reviewWord')) {
+    if (div.dataset.word === wordObj.word) {
+      targetDiv = div;
+      break;
+    }
+  }
+  if (!targetDiv) return;
+  const wrappers = targetDiv.querySelectorAll('.canvas-wrapper');
+  wrappers.forEach(wrapper => {
+    const markSpan = wrapper.querySelector('.mark-overlay');
+    if (markSpan) {
+      if (markType === 'correct') {
+        markSpan.textContent = '✅';
+        markSpan.style.display = 'flex';
+      } else if (markType === 'wrong') {
+        markSpan.textContent = '❌';
+        markSpan.style.display = 'flex';
+      } else {
+        markSpan.textContent = '';
+        markSpan.style.display = 'none';
+      }
+    }
+  });
+}
+
+// 清除词语的所有标记（内部使用）
+function clearWordMarks(wordObj) {
+  let targetDiv = null;
+  for (let div of reviewWordsDiv.querySelectorAll('.reviewWord')) {
+    if (div.dataset.word === wordObj.word) {
+      targetDiv = div;
+      break;
+    }
+  }
+  if (!targetDiv) return;
+  const wrappers = targetDiv.querySelectorAll('.canvas-wrapper');
+  wrappers.forEach(wrapper => {
+    const markSpan = wrapper.querySelector('.mark-overlay');
+    if (markSpan) {
+      markSpan.textContent = '';
+      markSpan.style.display = 'none';
+    }
+  });
+}
+
+// 渲染练习页面 (只渲染 status !== 'done' 的词语)
+function renderPractice(){
+  practiceWordsDiv.innerHTML = "";
+  const pendingWords = wordList.filter(w => w.status !== "done");
+  if(pendingWords.length === 0){
+    alert("🎉 太棒了！所有词语都正确掌握！ 🎉");
+    practiceArea.style.display = "none";
+    displayArea.style.display = "block";
+    return;
+  }
+  pendingWords.forEach((w)=>{
+    const chars = Array.from(w.word);
+    const pinyins = w.pinyin;
+    const wordContainer = document.createElement("div");
+    wordContainer.className = "wordPractice";
+    wordContainer.dataset.word = w.word;
+    wordContainer.style.marginBottom = "25px";
+    wordContainer.style.borderBottom = "1px solid #ddd";
+    wordContainer.style.paddingBottom = "10px";
+    
+    chars.forEach((char, i) => {
+      const card = document.createElement("div");
+      card.className = "char-card";
+      card.innerHTML = `
+        <div class="pinyin">${pinyins[i] || ""}</div>
+        <canvas width="120" height="120" data-char="${char}"></canvas>
+        <div class="eraserBtn">🧽 清空</div>
+      `;
+      wordContainer.appendChild(card);
+    });
+    practiceWordsDiv.appendChild(wordContainer);
+  });
+  
+  // 绑定所有canvas
+  const canvases = practiceArea.querySelectorAll("canvas");
+  canvases.forEach(c => initCanvas(c));
+  
+  // 绑定橡皮擦
+  const erasers = practiceArea.querySelectorAll(".eraserBtn");
+  erasers.forEach((btn) => {
+    const parentCard = btn.closest('.char-card');
+    if(parentCard){
+      const canvasElem = parentCard.querySelector('canvas');
+      if(canvasElem){
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          clearCanvasDrawing(canvasElem);
+        };
+      }
+    }
+  });
+}
+
+// 生成学习内容 (展示词语)
+generateDisplayBtn.onclick = ()=>{
+  const lines = wordInput.value.split("\n").map(w=>w.trim()).filter(Boolean);
+  if(lines.length===0) return alert("请输入词语");
+  wordList = [];
+  displayWordsDiv.innerHTML = "";
+  for(let word of lines){
+    const pinyinArr = getPinyin(word);
+    wordList.push({word, pinyin: pinyinArr, status: "pending"});
+    const div = document.createElement("div");
+    div.className = "wordDisplay";
+    div.innerHTML = `<div class="pinyin">${pinyinArr.join(" ")}</div>
+                     <div class="displayWord">${word}</div>`;
+    displayWordsDiv.appendChild(div);
+  }
+  document.getElementById("inputArea").style.display = "none";
+  displayArea.style.display = "block";
+  practiceArea.style.display = "none";
+  reviewArea.style.display = "none";
+};
+
+// 开始练习（重置所有未掌握词语，保留原始pending状态，但已掌握的不动？重新开始时全部设为pending更符合预期？按照儿童练习逻辑：开始练习应练习全部未掌握词语）
+// 但是为了尊重原有流程：从生成内容后点击开始练习，应全部练习（重置状态为pending），这样更符合日常使用。
+startPracticeBtn.onclick = ()=>{
+  // 将所有词语状态重置为 pending (未掌握)，重新开始一轮练习
+  wordList.forEach(w => w.status = "pending");
+  displayArea.style.display = "none";
+  practiceArea.style.display = "block";
+  renderPractice();
+};
+
+// 提交批改：将当前练习内容（画板数据）展示到批改页面，每个词语下方显示“正确/错误”按钮
+submitAllBtn.onclick = ()=>{
+  // 获取当前练习区域所有词语容器
+  const practiceContainers = practiceWordsDiv.querySelectorAll('.wordPractice');
+  if(practiceContainers.length === 0){
+    alert("暂无练习内容，请先生成学习内容");
+    return;
+  }
+  
+  practiceArea.style.display = "none";
+  reviewArea.style.display = "block";
+  reviewWordsDiv.innerHTML = "";
+  
+  // 遍历当前练习页面中的每个词语（只包含未掌握的词语）
+  const currentPracticeWords = Array.from(practiceContainers).map(container => container.dataset.word);
+  // 获取这些词语的完整对象
+  const wordsToReview = wordList.filter(w => currentPracticeWords.includes(w.word) && w.status !== "done");
+  
+  wordsToReview.forEach((wordObj) => {
+    // 找到对应的练习容器
+    const originalContainer = Array.from(practiceContainers).find(c => c.dataset.word === wordObj.word);
+    if(!originalContainer) return;
+    
+    const chars = Array.from(wordObj.word);
+    const pinyins = wordObj.pinyin;
+    
+    const reviewWordDiv = document.createElement("div");
+    reviewWordDiv.className = "reviewWord";
+    reviewWordDiv.dataset.word = wordObj.word;
+    reviewWordDiv.style.border = "1px solid #ccc";
+    reviewWordDiv.style.borderRadius = "20px";
+    reviewWordDiv.style.padding = "15px";
+    reviewWordDiv.style.marginBottom = "20px";
+    reviewWordDiv.style.backgroundColor = "#fff";
+    
+    // 显示词语标题
+    const titleDiv = document.createElement("div");
+    titleDiv.style.fontSize = "26px";
+    titleDiv.style.fontWeight = "bold";
+    titleDiv.style.marginBottom = "12px";
+    titleDiv.textContent = wordObj.word;
+    reviewWordDiv.appendChild(titleDiv);
+    
+    // 生成每个汉字的图片包装区
+    const canvasGroup = document.createElement("div");
+    canvasGroup.style.display = "flex";
+    canvasGroup.style.flexWrap = "wrap";
+    canvasGroup.style.justifyContent = "center";
+    canvasGroup.style.gap = "8px";
+    canvasGroup.style.marginBottom = "15px";
+    
+    // 获取该词语所有canvas
+    const canvases = originalContainer.querySelectorAll("canvas");
+    canvases.forEach((canvas, idx) => {
+      const imgData = canvas.toDataURL();
+      const img = document.createElement("img");
+      img.src = imgData;
+      img.width = 120;
+      img.height = 120;
+      img.style.display = "block";
+      img.style.border = "1px solid #aaa";
+      img.style.borderRadius = "8px";
+      img.style.backgroundColor = "#fff";
+      
+      // 包装层，用于显示对错号在田字格右上角
+      const wrapper = document.createElement("div");
+      wrapper.className = "canvas-wrapper";
+      wrapper.style.position = "relative";
+      wrapper.style.display = "inline-block";
+      wrapper.style.margin = "3px";
+      
+      const markSpan = document.createElement("span");
+      markSpan.className = "mark-overlay";
+      markSpan.style.position = "absolute";
+      markSpan.style.top = "2px";
+      markSpan.style.right = "2px";
+      markSpan.style.fontSize = "22px";
+      markSpan.style.fontWeight = "bold";
+      markSpan.style.backgroundColor = "rgba(255,255,200,0.85)";
+      markSpan.style.borderRadius = "50%";
+      markSpan.style.width = "28px";
+      markSpan.style.height = "28px";
+      markSpan.style.display = "none";
+      markSpan.style.alignItems = "center";
+      markSpan.style.justifyContent = "center";
+      markSpan.style.pointerEvents = "none";
+      markSpan.style.zIndex = "10";
+      
+      wrapper.appendChild(img);
+      wrapper.appendChild(markSpan);
+      canvasGroup.appendChild(wrapper);
+    });
+    reviewWordDiv.appendChild(canvasGroup);
+    
+    // 批改按钮区域：放置在田字格下方（每个词语整体下方）
+    const buttonGroup = document.createElement("div");
+    buttonGroup.className = "word-buttons";
+    buttonGroup.style.marginTop = "12px";
+    buttonGroup.style.textAlign = "center";
+    
+    const correctBtn = document.createElement("button");
+    correctBtn.textContent = "✅ 正确";
+    correctBtn.className = "correct-word-btn";
+    correctBtn.style.fontSize = "20px";
+    correctBtn.style.margin = "0 12px";
+    correctBtn.style.padding = "6px 20px";
+    correctBtn.style.borderRadius = "40px";
+    correctBtn.style.border = "none";
+    correctBtn.style.cursor = "pointer";
+    correctBtn.style.backgroundColor = "#c8e6c9";
+    
+    const wrongBtn = document.createElement("button");
+    wrongBtn.textContent = "❌ 错误";
+    wrongBtn.className = "wrong-word-btn";
+    wrongBtn.style.fontSize = "20px";
+    wrongBtn.style.margin = "0 12px";
+    wrongBtn.style.padding = "6px 20px";
+    wrongBtn.style.borderRadius = "40px";
+    wrongBtn.style.border = "none";
+    wrongBtn.style.cursor = "pointer";
+    wrongBtn.style.backgroundColor = "#ffccbc";
+    
+    buttonGroup.appendChild(correctBtn);
+    buttonGroup.appendChild(wrongBtn);
+    reviewWordDiv.appendChild(buttonGroup);
+    
+    reviewWordsDiv.appendChild(reviewWordDiv);
+    
+    // 绑定正确/错误事件 (实现标记在每个田字格右上角，并更新词语状态)
+    correctBtn.onclick = () => {
+      // 标记为正确掌握
+      wordObj.status = "done";
+      // 更新该词语所有田字格右上角显示✅
+      updateWordMarks(wordObj, 'correct');
+      // 可轻微改变按钮样式提示
+      correctBtn.style.backgroundColor = "#4caf50";
+      correctBtn.style.color = "white";
+      wrongBtn.style.backgroundColor = "#e0e0e0";
+      // 自动移除错误标记视觉效果（如果有）
+      // 同时禁用再次点击？不禁止，允许家长再次修改，但状态会变回正确。
+    };
+    
+    wrongBtn.onclick = () => {
+      // 标记为错误，需要重新练习
+      wordObj.status = "pending";
+      // 更新该词语所有田字格右上角显示❌
+      updateWordMarks(wordObj, 'wrong');
+      wrongBtn.style.backgroundColor = "#f44336";
+      wrongBtn.style.color = "white";
+      correctBtn.style.backgroundColor = "#e0e0e0";
+    };
+    
+    // 初始无标记（不清除原有标记但刚生成没有标记）
+    // 如果该词语已有状态（比如从之前批改返回后再次批改，保留上次标记？重新生成批改页面时都是全新，无标记）
+    // 确保干净
+    clearWordMarks(wordObj);
+  });
+  
+  // 添加“继续练习错词”按钮（循环练习所有状态为pending的词语）
+  const continueBtn = document.createElement("button");
+  continueBtn.textContent = "✍️ 继续练习错词 (只练习未正确的词语)";
+  continueBtn.className = "global-continue";
+  continueBtn.style.display = "block";
+  continueBtn.style.margin = "20px auto";
+  continueBtn.onclick = () => {
+    // 检查是否所有词语都正确了
+    const anyPending = wordList.some(w => w.status !== "done");
+    if (!anyPending) {
+      alert("🎉 恭喜！所有词语已完全正确！返回学习页面可开始新内容。");
+      reviewArea.style.display = "none";
+      displayArea.style.display = "block";
+      // 重置输入区域可选择重新生成，但保留原wordList便于新练习，重置显示区域
+      return;
+    }
+    // 关闭批改页面，打开练习页面，只渲染未正确词语
+    reviewArea.style.display = "none";
+    practiceArea.style.display = "block";
+    renderPractice();  // renderPractice 会自动过滤 status !== 'done' 的词语
+  };
+  reviewWordsDiv.appendChild(continueBtn);
+};
+
+// 额外提供一个功能: 如果用户从“继续练习错词”再次练习并且再次提交批改，会循环直至全部正确。
+// 为了保证提交批改时能基于最新的练习画板内容，再次提交会重新从当前practiceArea获取canvas截图，完美。
+// 需要确保每次重新renderPractice时，之前的手写内容被重置（新画板无笔迹）。符合重新练习预期。
+
+// 处理当所有词语都正确时，“继续练习错词”按钮会提示正确并返回展示区。
+// 额外添加一个重置或重新生成的便捷方式: 家长可刷新页面或重新生成内容。
+// 原“生成学习内容”会重置wordList，隐藏其他区域，正确。
+// 修复一个小细节: 开始练习时把所有词语状态重置为pending（因为新的一轮开始，所有词语都应该重新练习，确保完整流程）
+// 但原需求: 批改完重新练习错误内容，循环至全部正确。所以开始练习应重置全部状态为pending，但如果你已经练习过一部分并正确标记为done，想继续练习错词，“继续练习错词”不会重置正确词语状态，只练习未正确的。
+// 但“开始练习”按钮应该重新开始全量练习，因此点击开始练习时重置所有词语为pending。
+startPracticeBtn.onclick = ()=>{
+  // 重置所有词语状态为未掌握，开启全新一轮
+  wordList.forEach(w => w.status = "pending");
+  displayArea.style.display = "none";
+  practiceArea.style.display = "block";
+  renderPractice();
+};
+
+// 确保生成内容后，开始练习状态干净
+generateDisplayBtn.onclick = ()=>{
+  const lines = wordInput.value.split("\n").map(w=>w.trim()).filter(Boolean);
+  if(lines.length===0) return alert("请输入词语");
+  wordList = [];
+  displayWordsDiv.innerHTML = "";
+  for(let word of lines){
+    const pinyinArr = getPinyin(word);
+    wordList.push({word, pinyin: pinyinArr, status: "pending"});
+    const div = document.createElement("div");
+    div.className = "wordDisplay";
+    div.innerHTML = `<div class="pinyin">${pinyinArr.join(" ")}</div>
+                     <div class="displayWord">${word}</div>`;
+    displayWordsDiv.appendChild(div);
+  }
+  document.getElementById("inputArea").style.display = "none";
+  displayArea.style.display = "block";
+  practiceArea.style.display = "none";
+  reviewArea.style.display = "none";
+};
+
+// 额外增加页面初始化橡皮擦及防止报错
+window.onload = () => {
+  // 预置演示占位
+};
+</script>
+</body>
+</html>
