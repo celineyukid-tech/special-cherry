@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>儿童汉字练习 - 田字格手写板</title>
+<style>
+  * {
+    box-sizing: border-box;
+    user-select: none; /* 避免拖动干扰，但不影响文本选择 */
+  }
+  body {
+    font-family: "Microsoft YaHei", "Segoe UI", "Noto Sans CJK SC", Roboto, sans-serif;
+    padding: 12px;
+    background: #f0f7ff;
+    margin: 0;
+  }
+  h2 {
+    text-align: center;
+    margin: 0 0 8px 0;
+    font-size: 1.8rem;
+    color: #2c3e66;
+  }
+  h3 {
+    font-size: 1.3rem;
+    margin: 10px 0 8px 0;
+    color: #2c5a2e;
+    border-left: 6px solid #4caf50;
+    padding-left: 12px;
+  }
+  .card {
+    background: white;
+    border-radius: 28px;
+    padding: 16px;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+  }
+  textarea {
+    width: 100%;
+    height: 100px;
+    font-size: 18px;
+    padding: 12px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    font-family: monospace;
+    background: #fffef7;
+  }
+  button {
+    background: #ffb74d;
+    border: none;
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 8px 18px;
+    border-radius: 40px;
+    margin: 6px 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: 0.1s linear;
+  }
+  button:active {
+    transform: scale(0.97);
+  }
+  .btn-primary {
+    background: #4caf50;
+    color: white;
+  }
+  .btn-secondary {
+    background: #2196f3;
+    color: white;
+  }
+
+  /* 词语卡片行布局 ———— 与批改页一致：每个词语独立一行，格子紧凑排列 */
+  .word-row {
+    background: #ffffffdd;
+    background: white;
+    margin-bottom: 28px;
+    padding: 12px 8px;
+    border-radius: 28px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    transition: all 0.1s;
+  }
+  .word-header {
+    font-size: 26px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+    color: #1e466e;
+    letter-spacing: 4px;
+  }
+  /* 汉字单元容器（一个汉字包含拼音+田字格+橡皮） 紧凑排列 */
+  .char-unit {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 2px;
+    width: 120px;
+    vertical-align: top;
+  }
+  .char-pinyin {
+    font-size: 18px;
+    font-weight: 500;
+    color: #007BFF;
+    background: #f0f8ff;
+    width: 100%;
+    text-align: center;
+    border-radius: 20px;
+    padding: 2px 0;
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+  canvas {
+    width: 120px;
+    height: 120px;
+    display: block;
+    background: #fffef0;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  .eraser-icon {
+    font-size: 22px;
+    margin-top: 5px;
+    background: #ffe0b5;
+    width: 42px;
+    border-radius: 30px;
+    text-align: center;
+    cursor: pointer;
+    padding: 4px 0;
+    transition: 0.05s linear;
+  }
+  .eraser-icon:active {
+    background: #ffc46b;
+  }
+
+  /* 批改页的按钮样式：位于每个词语右侧同一行, 保持整洁 */
+  .review-actions {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 16px;
+    margin-bottom: 6px;
+  }
+  .review-actions button {
+    font-size: 1.6rem;
+    padding: 6px 24px;
+    background: #f9f9f9;
+    border: 2px solid #ddd;
+    box-shadow: none;
+  }
+  .review-actions .correct-btn {
+    background: #c8e6c9;
+    border-color: #2e7d32;
+    color: #1b5e20;
+  }
+  .review-actions .wrong-btn {
+    background: #ffcdd2;
+    border-color: #c62828;
+    color: #b71c1c;
+  }
+  /* 批改时每个词语下方展示手写图像缩略图，采用紧凑flex */
+  .handwrite-images {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin: 12px 0 8px;
+  }
+  .handwrite-images img {
+    border-radius: 12px;
+    border: 1px solid #ccc;
+    background: white;
+  }
+  /* 正确/错误临时标记（在词语旁展示符号，不改变原有布局）*/
+  .word-status-badge {
+    display: inline-block;
+    margin-left: 12px;
+    font-size: 28px;
+    vertical-align: middle;
+  }
+  .word-header-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  /* 练习区每个词语行中的格子容器 */
+  .chars-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+  }
+  /* 响应式 */
+  @media (max-width: 550px) {
+    .char-unit {
+      width: 100px;
+    }
+    canvas {
+      width: 100px;
+      height: 100px;
+    }
+    .char-pinyin {
+      font-size: 15px;
+    }
+    .word-header {
+      font-size: 22px;
+    }
+  }
+  @media (max-width: 450px) {
+    .char-unit {
+      width: 85px;
+    }
+    canvas {
+      width: 85px;
+      height: 85px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<h2>✍️ 儿童汉字练习</h2>
+
+<!-- 家长输入区域 -->
+<div class="card" id="inputCard">
+  <h3>📝 家长输入词语（每行一个）</h3>
+  <textarea id="wordInput" placeholder="例如：&#10;电脑&#10;学校&#10;花朵"></textarea><br>
+  <div style="text-align:center;">
+    <button id="generateDisplayBtn" class="btn-primary">✨ 生成学习内容</button>
+  </div>
+</div>
+
+<!-- 展示学习内容 -->
+<div id="displayArea" style="display:none;" class="card">
+  <h3>📖 今天要学习的词语</h3>
+  <div id="displayWords"></div>
+  <div style="text-align:center;">
+    <button id="startPracticeBtn" class="btn-secondary">✏️ 开始练习</button>
+  </div>
+</div>
+
+<!-- 练习区域 (全新版式，每个词语一行，紧凑田字格) -->
+<div id="practiceArea" style="display:none;">
+  <div id="practiceWords"></div>
+  <div style="text-align:center;">
+    <button id="submitAll" class="btn-primary">📮 提交批改</button>
+  </div>
+</div>
+
+<!-- 批改区域 (版式与练习区一致，展示手写图片 + 对错按钮) -->
+<div id="reviewArea" style="display:none;" class="card">
+  <h3>🔍 人工批改</h3>
+  <div id="reviewWords"></div>
+</div>
+
+<script src="https://unpkg.com/pinyin-pro@3.19.6/dist/index.js"></script>
+<script>
+  // ---------- DOM 元素 ----------
+  const wordInput = document.getElementById("wordInput");
+  const generateDisplayBtn = document.getElementById("generateDisplayBtn");
+  const displayArea = document.getElementById("displayArea");
+  const displayWordsDiv = document.getElementById("displayWords");
+  const startPracticeBtn = document.getElementById("startPracticeBtn");
+
+  const practiceArea = document.getElementById("practiceArea");
+  const practiceWordsDiv = document.getElementById("practiceWords");
+  const submitAllBtn = document.getElementById("submitAll");
+
+  const reviewArea = document.getElementById("reviewArea");
+  const reviewWordsDiv = document.getElementById("reviewWords");
+
+  let wordList = [];        // 存储词语对象 { word, pinyinArr, status, canvasData? 不存data, 动态读取 }
+  let currentPracticeRendered = false;  // 辅助刷新
+
+  // ---------- 拼音工具 ----------
+  function getPinyinForWord(word) {
+    if(window.pinyinPro) {
+      // 返回数组，每个字的拼音带声调符号
+      return window.pinyinPro.pinyin(word, { toneType: 'symbol', type: 'array' });
+    }
+    return Array.from(word).map(() => "");
+  }
+
+  // 画米字格 (保留背景网格)
+  function drawGrid(ctx, width, height) {
+    ctx.clearRect(0, 0, width, height);
+    ctx.strokeStyle = "#b0bec5";
+    ctx.lineWidth = 1;
+    // 外框
+    ctx.strokeRect(0, 0, width, height);
+    ctx.beginPath();
+    // 十字线
+    ctx.moveTo(width/2, 0); ctx.lineTo(width/2, height);
+    ctx.moveTo(0, height/2); ctx.lineTo(width, height/2);
+    // 对角线
+    ctx.moveTo(0, 0); ctx.lineTo(width, height);
+    ctx.moveTo(width, 0); ctx.lineTo(0, height);
+    ctx.stroke();
+    // 辅助虚线? 保留简约米字格即可
+  }
+
+  // 初始化 canvas 手写 (支持触摸+鼠标)
+  function initCanvasDrawing(canvas) {
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width, h = canvas.height;
+    drawGrid(ctx, w, h);
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#2c3e66';
+    let drawing = false;
+    let lastX = 0, lastY = 0;
+
+    const getCoords = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;   // canvas实际像素比 (120 / 显示宽度)
+      const scaleY = canvas.height / rect.height;
+      let clientX, clientY;
+      if (e.touches) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+      let x = (clientX - rect.left) * scaleX;
+      let y = (clientY - rect.top) * scaleY;
+      x = Math.min(Math.max(0, x), canvas.width);
+      y = Math.min(Math.max(0, y), canvas.height);
+      return { x, y };
+    };
+
+    const startDraw = (e) => {
+      drawing = true;
+      const { x, y } = getCoords(e);
+      lastX = x;
+      lastY = y;
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      e.preventDefault();
+    };
+    const drawMove = (e) => {
+      if (!drawing) return;
+      e.preventDefault();
+      const { x, y } = getCoords(e);
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      lastX = x;
+      lastY = y;
+    };
+    const endDraw = () => { drawing = false; };
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mousemove', drawMove);
+    canvas.addEventListener('mouseup', endDraw);
+    canvas.addEventListener('mouseleave', endDraw);
+    canvas.addEventListener('touchstart', startDraw);
+    canvas.addEventListener('touchmove', drawMove);
+    canvas.addEventListener('touchend', endDraw);
+  }
+
+  // 重置单个canvas (清除笔迹恢复米字格)
+  function clearCanvas(canvas) {
+    const ctx = canvas.getContext("2d");
+    drawGrid(ctx, canvas.width, canvas.height);
+  }
+
+  // ---------- 生成展示内容 ----------
+  generateDisplayBtn.onclick = () => {
+    const raw = wordInput.value;
+    const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(l => l !== "");
+    if(lines.length === 0) {
+      alert("请输入至少一个词语（每行一个）");
+      return;
+    }
+    wordList = [];
+    displayWordsDiv.innerHTML = "";
+    for(let word of lines) {
+      const pinyinArr = getPinyinForWord(word);
+      const chars = Array.from(word);
+      const wordObj = {
+        word: word,
+        pinyinArr: pinyinArr,
+        status: "pending",   // pending: 未掌握, done: 已掌握
+      };
+      wordList.push(wordObj);
+      // 展示词语卡片（学习内容预览）
+      const wordCard = document.createElement("div");
+      wordCard.className = "word-row";
+      let pinyinDisplay = "";
+      for(let i=0; i<chars.length; i++) {
+        pinyinDisplay += `<span style="margin:0 8px; font-size:18px;">${pinyinArr[i] || ''}</span>`;
+      }
+      wordCard.innerHTML = `
+        <div class="word-header">${word}</div>
+        <div style="text-align:center; font-size:18px; color:#1565c0;">${pinyinDisplay}</div>
+      `;
+      displayWordsDiv.appendChild(wordCard);
+    }
+    document.getElementById("inputCard").style.display = "none";
+    displayArea.style.display = "block";
+  };
+
+  // ---------- 开始练习：渲染与批改页一致的板式（每个词语一行，格子紧凑）----------
+  function renderPractice() {
+    practiceWordsDiv.innerHTML = "";
+    const pendingWords = wordList.filter(w => w.status !== "done");
+    if(pendingWords.length === 0) {
+      alert("🎉 太棒了！所有词语都已经正确掌握！学习完成 🎉");
+      practiceArea.style.display = "none";
+      // 可选展示完成界面，但保留原状
+      return;
+    }
+
+    for(let wordObj of pendingWords) {
+      const word = wordObj.word;
+      const pinyinArr = wordObj.pinyinArr;
+      const chars = Array.from(word);
+      // 创建一行容器 (与批改卡片风格类似)
+      const rowDiv = document.createElement("div");
+      rowDiv.className = "word-row";
+      rowDiv.setAttribute("data-word-key", word);
+      
+      // 词语头部 + 状态（稍后不显示，但保留一致性）
+      const headerDiv = document.createElement("div");
+      headerDiv.className = "word-header-wrap";
+      headerDiv.innerHTML = `<div class="word-header">${word}</div>`;
+      rowDiv.appendChild(headerDiv);
+      
+      // 紧凑田字格区域 (inline-flex)
+      const charsContainer = document.createElement("div");
+      charsContainer.className = "chars-container";
+      
+      for(let idx = 0; idx < chars.length; idx++) {
+        const character = chars[idx];
+        const pinyinChar = pinyinArr[idx] || "";
+        const unitDiv = document.createElement("div");
+        unitDiv.className = "char-unit";
+        
+        // 拼音
+        const pinyinSpan = document.createElement("div");
+        pinyinSpan.className = "char-pinyin";
+        pinyinSpan.innerText = pinyinChar;
+        
+        // canvas 田字格
+        const canvas = document.createElement("canvas");
+        canvas.width = 120;
+        canvas.height = 120;
+        canvas.style.width = "120px";
+        canvas.style.height = "120px";
+        canvas.setAttribute("data-char", character);
+        canvas.setAttribute("data-word", word);
+        canvas.setAttribute("data-idx", idx);
+        
+        // 橡皮擦按钮
+        const eraserDiv = document.createElement("div");
+        eraserDiv.className = "eraser-icon";
+        eraserDiv.innerText = "🧽";
+        
+        unitDiv.appendChild(pinyinSpan);
+        unitDiv.appendChild(canvas);
+        unitDiv.appendChild(eraserDiv);
+        charsContainer.appendChild(unitDiv);
+        
+        // 存储到临时候，稍后初始化绘图
+      }
+      rowDiv.appendChild(charsContainer);
+      practiceWordsDiv.appendChild(rowDiv);
+    }
+    
+    // 初始化所有canvas (绘画+擦除)
+    const allCanvases = practiceWordsDiv.querySelectorAll("canvas");
+    allCanvases.forEach(canvas => {
+      initCanvasDrawing(canvas);
+    });
+    // 绑定所有橡皮擦
+    const allErasers = practiceWordsDiv.querySelectorAll(".eraser-icon");
+    allErasers.forEach((eraser, index) => {
+      // 找到对应的canvas: 当前父级.char-unit下的canvas
+      const parentUnit = eraser.closest(".char-unit");
+      if(parentUnit) {
+        const targetCanvas = parentUnit.querySelector("canvas");
+        if(targetCanvas) {
+          eraser.onclick = (e) => {
+            e.stopPropagation();
+            clearCanvas(targetCanvas);
+          };
+        }
+      }
+    });
+  }
+  
+  // 提交批改：将当前练习页面所有的手写图像提取出来，展示与练习页面相同的版式 + 对错按钮
+  function submitForReview() {
+    // 收集当前展示的练习区域中所有未完成的词语（实际练习区只展示pending词语，但可能存在已渲染的最新pending）
+    // 注意：渲染的只有 status !== "done" 的词语。但为了确保正确，我们根据当前DOM实际词语来更新wordList状态（但保留原有）
+    const pendingWordsFromDom = [];
+    const rows = practiceWordsDiv.querySelectorAll(".word-row");
+    const currentWordObjectsMap = new Map(); // 从wordList中拿原始对象引用
+    wordList.forEach(w => { currentWordObjectsMap.set(w.word, w); });
+    
+    // 构建批改数据: 每个词语对应的canvas图像dataURL数组
+    const reviewData = [];
+    for(let row of rows) {
+      const headerElem = row.querySelector(".word-header");
+      if(!headerElem) continue;
+      const wordText = headerElem.innerText.trim();
+      const wordObj = currentWordObjectsMap.get(wordText);
+      if(!wordObj) continue;
+      // 获取该词语下所有canvas
+      const canvases = row.querySelectorAll("canvas");
+      const imagesData = [];
+      canvases.forEach(canvas => {
+        imagesData.push(canvas.toDataURL());
+      });
+      reviewData.push({
+        wordObj: wordObj,
+        word: wordText,
+        images: imagesData,
+        pinyinArr: wordObj.pinyinArr
+      });
+    }
+    
+    // 隐藏练习区，展示批改区，采用同样的板式
+    practiceArea.style.display = "none";
+    reviewArea.style.display = "block";
+    reviewWordsDiv.innerHTML = "";
+    
+    for(let item of reviewData) {
+      const wordObj = item.wordObj;
+      const word = item.word;
+      const images = item.images;
+      const chars = Array.from(word);
+      const pinyinArr = item.pinyinArr;
+      
+      const reviewRow = document.createElement("div");
+      reviewRow.className = "word-row";
+      reviewRow.setAttribute("data-review-word", word);
+      
+      // 头部显示词语 + 临时状态（稍后通过符号展示）
+      const headerWrap = document.createElement("div");
+      headerWrap.className = "word-header-wrap";
+      const wordSpan = document.createElement("div");
+      wordSpan.className = "word-header";
+      wordSpan.innerText = word;
+      headerWrap.appendChild(wordSpan);
+      reviewRow.appendChild(headerWrap);
+      
+      // 展示每个汉字对应的手写图片 (紧凑图片列表)
+      const imagesContainer = document.createElement("div");
+      imagesContainer.className = "handwrite-images";
+      for(let i=0; i<chars.length; i++) {
+        const imgWrapper = document.createElement("div");
+        imgWrapper.style.display = "inline-block";
+        imgWrapper.style.textAlign = "center";
+        imgWrapper.style.margin = "4px";
+        const img = document.createElement("img");
+        img.src = images[i];
+        img.width = 120;
+        img.height = 120;
+        img.style.borderRadius = "12px";
+        img.style.border = "1px solid #aaa";
+        const pinyinSmall = document.createElement("div");
+        pinyinSmall.style.fontSize = "14px";
+        pinyinSmall.style.color = "#0d47a1";
+        pinyinSmall.innerText = pinyinArr[i] || "";
+        imgWrapper.appendChild(pinyinSmall);
+        imgWrapper.appendChild(img);
+        imagesContainer.appendChild(imgWrapper);
+      }
+      reviewRow.appendChild(imagesContainer);
+      
+      // 对错按钮区域
+      const actionsDiv = document.createElement("div");
+      actionsDiv.className = "review-actions";
+      const correctBtn = document.createElement("button");
+      correctBtn.innerText = "✅ 正确";
+      correctBtn.classList.add("correct-btn");
+      const wrongBtn = document.createElement("button");
+      wrongBtn.innerText = "❌ 错误";
+      wrongBtn.classList.add("wrong-btn");
+      actionsDiv.appendChild(correctBtn);
+      actionsDiv.appendChild(wrongBtn);
+      reviewRow.appendChild(actionsDiv);
+      
+      // 添加一个隐藏状态标记（展示当前反馈符号）
+      const badgeSpan = document.createElement("span");
+      badgeSpan.className = "word-status-badge";
+      badgeSpan.style.display = "none";
+      headerWrap.appendChild(badgeSpan);
+      
+      reviewWordsDiv.appendChild(reviewRow);
+      
+      // 正确逻辑：标记此词语为 done，刷新到下一个批改项(移除当前批改卡片并更新wordList状态)
+      const handleCorrect = () => {
+        // 显示短暂的对号标记然后移除该词语（表示已掌握）
+        wordObj.status = "done";
+        // 视觉上给一个反馈标记
+        badgeSpan.style.display = "inline-block";
+        badgeSpan.innerText = "✅";
+        badgeSpan.style.color = "#2e7d32";
+        // 延迟移除该卡片 (让用户看到打勾符号)
+        setTimeout(() => {
+          reviewRow.remove();
+          // 检查是否还有未批改的词语卡片
+          const remaining = reviewWordsDiv.querySelectorAll(".word-row");
+          if(remaining.length === 0) {
+            // 批改完成，回到练习区（可能还有未正确或全部正确？）
+            // 但wordList状态已经修改，如果有pending则继续练习，否则完成
+            const stillPending = wordList.filter(w => w.status !== "done");
+            if(stillPending.length === 0) {
+              alert("🎉 全部正确！学习完成 🎉");
+              reviewArea.style.display = "none";
+              practiceArea.style.display = "none";
+              displayArea.style.display = "none";
+              // 可重置显示一个完成界面简单提示
+              const completeMsg = document.createElement("div");
+              completeMsg.className = "card";
+              completeMsg.innerHTML = "<h3>🎉 恭喜完成今日汉字练习 🎉</h3><button id='resetHome'>🏠 再学一组</button>";
+              document.body.appendChild(completeMsg);
+              document.getElementById("resetHome")?.addEventListener("click",()=>{
+                location.reload();
+              });
+            } else {
+              // 仍有错误词语, 继续练习（重新渲染练习区）
+              reviewArea.style.display = "none";
+              renderPractice();
+              practiceArea.style.display = "block";
+            }
+          }
+        }, 300);
+      };
+      
+      // 错误逻辑：词语状态保持 pending，且立刻移除当前卡片，刷新练习区时仍然保留该词语
+      const handleWrong = () => {
+        wordObj.status = "pending";  // 确保是未通过
+        badgeSpan.style.display = "inline-block";
+        badgeSpan.innerText = "❌";
+        badgeSpan.style.color = "#c62828";
+        setTimeout(() => {
+          reviewRow.remove();
+          const remaining = reviewWordsDiv.querySelectorAll(".word-row");
+          if(remaining.length === 0) {
+            // 返回练习重新书写所有错误词语
+            reviewArea.style.display = "none";
+            renderPractice();    // 仅渲染 status !== "done"
+            practiceArea.style.display = "block";
+          }
+        }, 300);
+      };
+      
+      correctBtn.onclick = handleCorrect;
+      wrongBtn.onclick = handleWrong;
+    }
+  }
+  
+  // 开始练习按钮
+  startPracticeBtn.onclick = () => {
+    displayArea.style.display = "none";
+    practiceArea.style.display = "block";
+    renderPractice();
+  };
+  
+  // 提交批改按钮
+  submitAllBtn.onclick = () => {
+    // 确保当前练习区域存在未提交的内容
+    const rowsExist = practiceWordsDiv.querySelectorAll(".word-row").length;
+    if(rowsExist === 0) {
+      alert("没有可批改的练习，请先开始练习");
+      return;
+    }
+    submitForReview();
+  };
+  
+  // 辅助函数: 提供重置最终，但无需额外
+</script>
+</body>
+</html>
