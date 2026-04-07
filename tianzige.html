@@ -3,44 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>智慧田字格 · 看拼音写汉字练习</title>
+    <title>智慧田字格 · 看拼音写汉字</title>
     <style>
         * {
             box-sizing: border-box;
-            user-select: none; /* 避免触屏选中文字干扰，但保留输入框选中 */
         }
 
         body {
             background: #f7f3e9;
-            font-family: 'Segoe UI', 'Noto Sans CJK SC', 'Helvetica Neue', Roboto, 'Apple Color Emoji', sans-serif;
+            font-family: 'Segoe UI', 'Noto Sans CJK SC', 'Helvetica Neue', Roboto, sans-serif;
             margin: 0;
             padding: 20px 16px 40px;
             color: #2d3e2b;
         }
 
-        /* 主容器 */
         .container {
             max-width: 1200px;
             margin: 0 auto;
         }
 
-        /* 卡片通用样式 */
         .card {
             background: #fffef7;
             border-radius: 48px 32px 48px 32px;
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
             padding: 1.5rem;
             margin-bottom: 2rem;
-            transition: all 0.2s;
-        }
-
-        h2, h3 {
-            margin-top: 0;
-            font-weight: 600;
-            letter-spacing: -0.3px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
 
         h2 {
@@ -48,45 +35,30 @@
             color: #c47b2e;
             border-left: 6px solid #e9b35f;
             padding-left: 16px;
-        }
-
-        h3 {
-            font-size: 1.3rem;
-            color: #5a3e2b;
-            margin-bottom: 1rem;
-        }
-
-        /* 输入区 */
-        .word-input-area {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+            margin-top: 0;
         }
 
         textarea {
             width: 100%;
             padding: 16px 20px;
             font-size: 1.1rem;
-            font-family: monospace, 'Courier New', 'Noto Sans CJK SC';
             border: 2px solid #e2dccd;
             border-radius: 32px;
             background: #fefcf5;
             resize: vertical;
-            transition: 0.2s;
-            line-height: 1.5;
+            font-family: monospace;
         }
 
         textarea:focus {
             border-color: #e9b35f;
             outline: none;
-            box-shadow: 0 0 0 3px rgba(233, 179, 95, 0.2);
         }
 
         .button-group {
             display: flex;
             flex-wrap: wrap;
             gap: 14px;
-            margin-top: 8px;
+            margin-top: 12px;
         }
 
         .btn {
@@ -99,23 +71,17 @@
             color: #2d3e2b;
             cursor: pointer;
             transition: 0.2s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             font-family: inherit;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
         }
 
         .btn-secondary {
             background: #d9d0b5;
-            color: #3e3a2e;
         }
 
         .btn-outline {
             background: transparent;
             border: 2px solid #e9b35f;
             color: #c47b2e;
-            box-shadow: none;
         }
 
         .btn-primary {
@@ -132,50 +98,44 @@
             transform: scale(0.96);
         }
 
-        /* 练习区域 (田字格网格) */
         .practice-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 220px));
-            gap: 2rem 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 200px));
+            gap: 1.5rem;
             justify-content: center;
             margin-top: 1rem;
         }
 
-        /* 单个田字格卡片 */
         .tian-cell {
             background: #fffdf7;
             border-radius: 28px;
-            padding: 1rem 0.5rem 1rem 0.5rem;
+            padding: 1rem 0.5rem;
             box-shadow: 0 8px 12px rgba(0, 0, 0, 0.05);
-            transition: all 0.2s;
             display: flex;
             flex-direction: column;
             align-items: center;
+            position: relative;
         }
 
         .pinyin-area {
-            font-size: 1.9rem;
+            font-size: 1.5rem;
             font-weight: 600;
             text-align: center;
             background: #f3efdf;
-            padding: 12px 8px;
+            padding: 10px 8px;
             border-radius: 48px;
             margin-bottom: 16px;
             width: 90%;
             color: #b45f2b;
-            letter-spacing: 1px;
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.02), 0 1px 0 white;
         }
 
-        /* 画板容器 (田字格画板) */
         .canvas-wrapper {
             position: relative;
-            width: 160px;
-            height: 160px;
+            width: 150px;
+            height: 150px;
             margin: 0 auto;
             background: #fef7e0;
-            border-radius: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
             cursor: crosshair;
         }
 
@@ -186,13 +146,12 @@
             width: 100%;
             height: 100%;
             display: block;
-            border-radius: 20px;
+            border-radius: 16px;
             background: #fffef5;
-            box-shadow: inset 0 0 0 2px #e7dbbc, 0 2px 6px rgba(0,0,0,0.05);
-            touch-action: none;  /* 触屏绘制关键 */
+            box-shadow: inset 0 0 0 2px #e7dbbc;
+            touch-action: none;
         }
 
-        /* 田字格辅助线 (底层背景通过canvas绘制，但为了好看再加一层装饰) */
         .action-buttons {
             display: flex;
             gap: 10px;
@@ -201,15 +160,6 @@
             flex-wrap: wrap;
         }
 
-        .badge {
-            font-size: 0.7rem;
-            background: #ece3d0;
-            padding: 4px 12px;
-            border-radius: 30px;
-            color: #7a5a3a;
-        }
-
-        /* 批改工具栏 */
         .review-toolbar {
             background: #faf3e0;
             border-radius: 60px;
@@ -227,73 +177,64 @@
             background: #e9e0cc;
             border-radius: 36px;
             padding: 16px 20px;
-            font-weight: 500;
         }
 
         .score-text {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             font-weight: bold;
             color: #c0681e;
         }
 
-        hr {
-            margin: 1rem 0;
-            border-color: #e9ddbb;
+        .mark-icon {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 0 0 2px white;
+            pointer-events: none;
+            z-index: 10;
         }
 
         @media (max-width: 550px) {
             .practice-grid {
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-                gap: 1rem;
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             }
             .canvas-wrapper {
-                width: 140px;
-                height: 140px;
+                width: 130px;
+                height: 130px;
             }
             .pinyin-area {
-                font-size: 1.5rem;
+                font-size: 1.2rem;
             }
-            .card {
-                padding: 1rem;
-            }
-        }
-
-        footer {
-            text-align: center;
-            font-size: 0.8rem;
-            color: #a7906e;
-            margin-top: 2rem;
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <!-- 第一部分：词语输入区 -->
     <div class="card">
-        <h2>📝 词语库 · 用顿号隔开</h2>
+        <h2>📝 输入词语（用换行或顿号分隔）</h2>
         <div class="word-input-area">
-            <textarea id="wordInput" rows="3" placeholder="示例：苹果&#10;香蕉&#10;熊猫&#10;快乐">苹果
+            <textarea id="wordInput" rows="3" placeholder="示例：&#10;苹果&#10;香蕉&#10;熊猫&#10;快乐">苹果
 香蕉
 熊猫
 快乐</textarea>
             <div class="button-group">
-                <button id="generateBtn" class="btn">✨ 生成练习页面</button>
-                <button id="sampleBtn" class="btn btn-secondary">📋 加载示例(成语/词语)</button>
-                <button id="clearDrawAllBtn" class="btn btn-outline btn-sm">🧽 清空所有笔迹</button>
+                <button id="generateBtn" class="btn">✨ 生成练习</button>
+                <button id="sampleBtn" class="btn btn-secondary">📋 加载示例</button>
+                <button id="clearAllMarksBtn" class="btn btn-outline btn-sm">🗑️ 清除所有批改标记</button>
             </div>
-            <div class="badge" style="align-self: flex-start;">💡 提示：每行一个词语或单字，支持多字词；自动提取拼音(带声调)</div>
+            <div class="badge" style="align-self: flex-start; font-size:0.8rem; color:#7a5a3a;">💡 词语会拆成单字练习，每个字独立田字格，上方显示拼音</div>
         </div>
     </div>
 
-    <!-- 第二部分 + 第三部分 动态练习&批改区 -->
     <div id="practicePanel" style="display: none;">
         <div class="card">
-            <h2>✍️ 看拼音写汉字 · 田字格手写板</h2>
+            <h2>✍️ 看拼音写汉字 · 单字练习</h2>
             <div id="reviewToolbar" class="review-toolbar">
-                <span class="badge">✅ 批改工具</span>
-                <button id="batchCorrectBtn" class="btn btn-sm btn-primary">⭐ 智能批改本题</button>
-                <button id="resetAllHandwritingBtn" class="btn btn-sm btn-outline">🖌️ 重置所有书写</button>
-                <span id="progressTip" class="badge">0 / 0 已批改</span>
+                <button id="batchCorrectBtn" class="btn btn-primary">⭐ 智能批改全部</button>
+                <button id="resetAllHandwritingBtn" class="btn btn-outline">🖌️ 清空所有笔迹</button>
+                <span id="progressTip" class="badge" style="background:#ece3d0; padding:6px 14px;">0 / 0 已批改</span>
             </div>
             <div id="tianGridContainer" class="practice-grid"></div>
             <div id="correctionResultArea" class="result-area" style="display: none;">
@@ -302,77 +243,79 @@
             </div>
         </div>
     </div>
-    <footer>✍️ 触屏/鼠标均可书写 | 田字格内手写汉字 | 点击「智能批改」对比答案</footer>
 </div>
 
 <script>
-    // ---------- 拼音转换 (简易带声调，支持多音字基础，主要根据常见字) ----------
-    // 为了演示，内置一个简单的汉字转拼音库 (覆盖大部分常用字, 带声调)
-    // 真实场景可接入API，此处使用 pinyin-pro 风格简易映射 + 动态 fallback
-    // 为了保证演示词语都能有拼音，我们建立一个常用词拼音映射库 + 动态单字拼音兜底。
-    const pinyinMap = new Map([
-        ["苹果", "píng guǒ"], ["香蕉", "xiāng jiāo"], ["熊猫", "xióng māo"], ["快乐", "kuài lè"],
-        ["学习", "xué xí"], ["编程", "biān chéng"], ["田字格", "tián zì gé"], ["写字", "xiě zì"],
-        ["中国", "zhōng guó"], ["春天", "chūn tiān"], ["花朵", "huā duǒ"], ["太阳", "tài yáng"],
-        ["月亮", "yuè liàng"], ["星星", "xīng xīng"], ["老师", "lǎo shī"], ["学生", "xué shēng"],
-        ["爱", "ài"], ["好", "hǎo"], ["大", "dà"], ["小", "xiǎo"]
-    ]);
-    // 单字备用字典 (简单常用)
-    const charPinyin = {
+    // ==================== 汉字转拼音（单字库 + 兜底） ====================
+    const charPinyinMap = {
         "苹":"píng","果":"guǒ","香":"xiāng","蕉":"jiāo","熊":"xióng","猫":"māo","快":"kuài","乐":"lè",
         "学":"xué","习":"xí","编":"biān","程":"chéng","田":"tián","字":"zì","格":"gé","写":"xiě",
         "中":"zhōng","国":"guó","春":"chūn","天":"tiān","花":"huā","朵":"duǒ","太":"tài","阳":"yáng",
         "月":"yuè","亮":"liàng","星":"xīng","老":"lǎo","师":"shī","生":"shēng","爱":"ài","好":"hǎo",
-        "大":"dà","小":"xiǎo"
+        "大":"dà","小":"xiǎo","云":"yún","风":"fēng","雨":"yǔ","雪":"xuě","山":"shān","水":"shuǐ",
+        "日":"rì","月":"yuè","火":"huǒ","木":"mù","土":"tǔ","金":"jīn","口":"kǒu","耳":"ěr"
     };
 
-    function getWordPinyin(word) {
-        if (pinyinMap.has(word)) return pinyinMap.get(word);
-        // 逐字转换 并用空格连接
-        let pinyinArr = [];
-        for (let ch of word) {
-            if (charPinyin[ch]) pinyinArr.push(charPinyin[ch]);
-            else pinyinArr.push(ch); // fallback
-        }
-        let result = pinyinArr.join(' ');
-        pinyinMap.set(word, result);
-        return result;
+    function getSinglePinyin(ch) {
+        if (charPinyinMap[ch]) return charPinyinMap[ch];
+        // 兜底：简单转换带声调的拼音基本没有，但至少返回字母占位
+        return ch;
     }
 
-    // 数据模型
-    let currentWordList = [];     // [{word, pinyin, id}]
-    let handwritingData = [];     // 存储每个canvas的图像数据或者绘制轨迹，为简单可靠，存储canvas context 持久绘制状态，采用每个canvas独立管理 + 存储imageData快照用于重置/批改对比
-    // 但我们设计更稳健：每个田字格独立维护一个离屏canvas或者存储像素数据数组，使用Canvas画板类。
-    // 为批改方便，我们需要识别用户书写的大致内容？由于全手写OCR不现实，但交互“批改”功能，让用户自己对照？但题目要求“批改工具直接在交互的田字格部分进行批改的功能”。
-    // 设计思路：教师/学生自评模式？但是更合理的“批改工具”是指用户点批改，系统对比预设汉字与用户手写(通过手写识别复杂)。为了体现智能并符合期望，我们提供一个视觉辅助批改和人工标记对错？
-    // 为了满足“批改工具直接在田字格部分批改”，可以在每个田字格下方显示“校对”按钮，或整体批改给出判断标记（老师对号/叉）。
-    // 实现一种半智能：基于画板笔画范围分析和模板匹配太复杂，故采用“自我批改+AI相似度启发”？更好: 提供标准答案对比和用户自评工具，但第三部分明确“批改工具”交互。
-    // 设计高级方案：保存用户手写图片后，通过离线OCR? 不现实。因此我用一种“智能辅助批改”方式：用户写完每个字，点击“批改”按钮后，将用户手写图片与标准汉字图片进行特征比对（使用简单的像素密度/方向？不精准）。
-    // 但是更合理且有趣：增加参考汉字显示，学生可自行核对，同时系统提供AI相似度粗略评估（基于Canvas像素差异与标准字形库差异），因为手写千奇百怪，仅用作趣味激励。
-    // 但题目要求很高，我们采用“对比轮廓差异”给出正确度百分比，并可以在田字格上显示对错图标。这算是AI批改雏形，用户体验流畅。
-    // 实现方式：为每个田字格预先绘制标准汉字（透明背景灰色字）来对比用户绘制像素差异？ 但真正批改时，计算用户绘制区域与标准汉字的覆盖匹配率。
-    // 但是标准字形可以使用canvas绘制字体路径，然后比较像素差异。为不复杂，但可行。我们在每个田字格里，对比用户绘制像素点集和标准汉字渲染后的二值图像重叠度。
-    // 实现批改核心: 获取用户绘制的canvas像素点，获取同一位置标准汉字(不绘制用户笔迹,单独离屏)比较覆盖率。评分≥阈值则正确。
-    // 具体: 每个田字格背后一个标准汉字，批改时，提取用户canvas图像数据，生成二值图，与标准汉字二值图相交计算。
-    
-    // 田字格管理器
+    // 将词语列表拆分成单字练习项
+    function expandWordsToChars(wordsArray) {
+        let items = [];
+        for (let word of wordsArray) {
+            for (let ch of word) {
+                if (ch.trim() && !/[，,、。？!；：\s]/.test(ch)) {  // 过滤标点空格
+                    items.push({
+                        id: items.length,
+                        char: ch,
+                        pinyin: getSinglePinyin(ch)
+                    });
+                }
+            }
+        }
+        return items;
+    }
+
+    // 解析输入框内容
+    function parseInputToWords(raw) {
+        let lines = raw.split(/\r?\n/);
+        let words = [];
+        for (let line of lines) {
+            if (line.includes('、') || line.includes('，') || line.includes(',')) {
+                let splits = line.split(/[、，,]+/);
+                for (let s of splits) {
+                    let cleaned = s.trim();
+                    if (cleaned) words.push(cleaned);
+                }
+            } else {
+                let cleaned = line.trim();
+                if (cleaned) words.push(cleaned);
+            }
+        }
+        return words;
+    }
+
+    // ==================== 田字格画板类 ====================
     class TianCanvas {
-        constructor(canvasElement, standardWord, wordId) {
+        constructor(canvasElement, standardChar, charId) {
             this.canvas = canvasElement;
             this.ctx = canvasElement.getContext('2d');
-            this.standardWord = standardWord;
-            this.id = wordId;
+            this.standardChar = standardChar;
+            this.id = charId;
             this.isDrawing = false;
-            this.lastX = 0; this.lastY = 0;
+            this.lastX = 0;
+            this.lastY = 0;
+            this.correctStatus = null;
             this.setupCanvasSize();
-            this.drawGrid();      // 绘制田字格背景
+            this.drawGrid();
             this.initEvents();
-            this.correctStatus = null; // 'correct', 'wrong'
         }
 
         setupCanvasSize() {
             const rect = this.canvas.getBoundingClientRect();
-            // 实际像素尺寸匹配
             const w = rect.width;
             const h = rect.height;
             if (this.canvas.width !== w || this.canvas.height !== h) {
@@ -387,16 +330,13 @@
             this.ctx.save();
             this.ctx.strokeStyle = "#d4c9aa";
             this.ctx.lineWidth = 1.5;
-            // 外框
             this.ctx.strokeRect(2, 2, w-4, h-4);
-            // 十字虚线
             this.ctx.beginPath();
             this.ctx.moveTo(w/2, 2);
             this.ctx.lineTo(w/2, h-2);
             this.ctx.moveTo(2, h/2);
             this.ctx.lineTo(w-2, h/2);
             this.ctx.stroke();
-            // 对角线
             this.ctx.beginPath();
             this.ctx.moveTo(4,4);
             this.ctx.lineTo(w-4, h-4);
@@ -430,7 +370,8 @@
                 e.preventDefault();
                 this.isDrawing = true;
                 const { x, y } = getPos(e);
-                this.lastX = x; this.lastY = y;
+                this.lastX = x;
+                this.lastY = y;
                 this.ctx.beginPath();
                 this.ctx.moveTo(x, y);
                 this.ctx.lineCap = 'round';
@@ -452,7 +393,6 @@
             };
             const endDraw = () => {
                 this.isDrawing = false;
-                this.saveState();
             };
             this.canvas.addEventListener('mousedown', startDraw);
             this.canvas.addEventListener('mousemove', draw);
@@ -460,10 +400,6 @@
             this.canvas.addEventListener('touchstart', startDraw, {passive: false});
             this.canvas.addEventListener('touchmove', draw, {passive: false});
             this.canvas.addEventListener('touchend', endDraw);
-        }
-
-        saveState() {
-            // 存储当前数据用于重置等
         }
 
         clear() {
@@ -474,7 +410,6 @@
         }
 
         removeMark() {
-            // 移除右上角标记
             const parent = this.canvas.parentNode;
             const existing = parent.querySelector('.mark-icon');
             if(existing) existing.remove();
@@ -485,75 +420,83 @@
             this.removeMark();
             const markSpan = document.createElement('div');
             markSpan.className = 'mark-icon';
-            markSpan.style.position = 'absolute';
-            markSpan.style.top = '5px';
-            markSpan.style.right = '8px';
-            markSpan.style.fontSize = '28px';
-            markSpan.style.fontWeight = 'bold';
-            markSpan.style.textShadow = '0 0 2px white';
-            markSpan.style.pointerEvents = 'none';
             markSpan.innerText = isCorrect ? '✓' : '✗';
             markSpan.style.color = isCorrect ? '#2b7a3e' : '#c23b22';
             this.canvas.parentNode.style.position = 'relative';
             this.canvas.parentNode.appendChild(markSpan);
         }
 
-        // 批改核心: 与标准汉字比较像素重叠度
-        async evaluate(standardChar) {
-            // 离屏canvas 生成标准汉字图像(黑字白色背景)
+        async evaluate() {
+            // 检测笔画像素数量
+            const userData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+            let pixelCount = 0;
+            for (let i = 0; i < userData.data.length; i += 4) {
+                if (userData.data[i] < 200) pixelCount++;
+            }
+            // 笔画太少直接判错（防止瞎写）
+            if (pixelCount < 40) {
+                return { score: 0, correct: false, reason: "笔画太少" };
+            }
+
+            // 离屏canvas渲染标准字
             const offCanvas = document.createElement('canvas');
             offCanvas.width = this.canvas.width;
             offCanvas.height = this.canvas.height;
             const offCtx = offCanvas.getContext('2d');
             offCtx.fillStyle = '#fffef5';
             offCtx.fillRect(0, 0, offCanvas.width, offCanvas.height);
-            offCtx.font = `bold ${offCanvas.width * 0.65}px "Noto Sans CJK SC", "KaiTi", "楷体", cursive`;
+            const fontSize = offCanvas.width * 0.68;
+            offCtx.font = `bold ${fontSize}px "Noto Sans CJK SC", "KaiTi", "楷体", cursive`;
             offCtx.textAlign = 'center';
             offCtx.textBaseline = 'middle';
             offCtx.fillStyle = '#000000';
-            offCtx.fillText(standardChar, offCanvas.width/2, offCanvas.height/2);
-            // 获取用户绘制图像
-            const userData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+            offCtx.fillText(this.standardChar, offCanvas.width/2, offCanvas.height/2);
+            
             const stdData = offCtx.getImageData(0, 0, offCanvas.width, offCanvas.height);
-            let userPixels = 0, overlapPixels = 0;
+            let overlap = 0, userTotal = 0, stdTotal = 0;
             for (let i = 0; i < userData.data.length; i += 4) {
-                const userDark = userData.data[i] < 200; // 笔画暗色
+                const userDark = userData.data[i] < 200;
                 const stdDark = stdData.data[i] < 200;
-                if (userDark) userPixels++;
-                if (userDark && stdDark) overlapPixels++;
+                if (userDark) userTotal++;
+                if (stdDark) stdTotal++;
+                if (userDark && stdDark) overlap++;
             }
-            if (userPixels === 0) return { score: 0, correct: false };
-            let ratio = overlapPixels / userPixels;
-            // 同时考虑标准字覆盖率
-            let totalStd = 0;
-            for (let i = 0; i < stdData.data.length; i+=4) if(stdData.data[i] < 200) totalStd++;
-            let cover = totalStd ? overlapPixels / totalStd : 0;
-            let finalScore = (ratio * 0.6 + cover * 0.4);
-            const isCorrect = finalScore > 0.45 && userPixels > 30;
+            if (userTotal === 0) return { score: 0, correct: false };
+            const userCover = overlap / userTotal;
+            const stdCover = stdTotal ? overlap / stdTotal : 0;
+            let finalScore = userCover * 0.6 + stdCover * 0.4;
+            const isCorrect = finalScore > 0.52 && pixelCount > 50;
             return { score: finalScore, correct: isCorrect };
         }
     }
 
-    let tianInstances = [];   // 存储TianCanvas对象
+    let currentItems = [];
+    let tianInstances = [];
 
-    function renderPractice(words) {
+    function renderPractice(items) {
         const container = document.getElementById('tianGridContainer');
         container.innerHTML = '';
         tianInstances = [];
-        if (!words.length) return;
-        words.forEach((item, idx) => {
+        if (!items.length) return;
+
+        for (let item of items) {
             const cell = document.createElement('div');
             cell.className = 'tian-cell';
+            
+            // 拼音区域（显示拼音，不是汉字！）
             const pinyinDiv = document.createElement('div');
             pinyinDiv.className = 'pinyin-area';
-            pinyinDiv.innerText = item.pinyin;
+            pinyinDiv.innerText = item.pinyin;   // ✅ 关键修复：显示拼音
+            
             const canvasWrapper = document.createElement('div');
             canvasWrapper.className = 'canvas-wrapper';
             const canvas = document.createElement('canvas');
-            canvas.width = 300; canvas.height = 300;
+            canvas.width = 300;
+            canvas.height = 300;
             canvas.style.width = '100%';
             canvas.style.height = '100%';
             canvasWrapper.appendChild(canvas);
+            
             const btnGroup = document.createElement('div');
             btnGroup.className = 'action-buttons';
             const clearBtn = document.createElement('button');
@@ -564,21 +507,25 @@
             correctSingleBtn.className = 'btn btn-secondary btn-sm';
             btnGroup.appendChild(clearBtn);
             btnGroup.appendChild(correctSingleBtn);
+            
             cell.appendChild(pinyinDiv);
             cell.appendChild(canvasWrapper);
             cell.appendChild(btnGroup);
             container.appendChild(cell);
-            // 初始化canvas绘图实例
-            const tian = new TianCanvas(canvas, item.word, idx);
+            
+            const tian = new TianCanvas(canvas, item.char, item.id);
             tianInstances.push(tian);
-            // 绑定清除
-            clearBtn.onclick = () => { tian.clear(); };
+            
+            clearBtn.onclick = () => { 
+                tian.clear(); 
+                updateOverallProgress();
+            };
             correctSingleBtn.onclick = async () => {
-                const res = await tian.evaluate(item.word);
+                const res = await tian.evaluate();
                 tian.markResult(res.correct);
                 updateOverallProgress();
             };
-        });
+        }
         document.getElementById('practicePanel').style.display = 'block';
         document.getElementById('correctionResultArea').style.display = 'none';
         updateOverallProgress();
@@ -586,71 +533,54 @@
 
     async function batchCorrect() {
         let correctCount = 0;
-        for(let i=0; i<tianInstances.length && i<currentWordList.length; i++) {
+        for (let i = 0; i < tianInstances.length; i++) {
             const tian = tianInstances[i];
-            const wordObj = currentWordList[i];
-            const result = await tian.evaluate(wordObj.word);
-            tian.markResult(result.correct);
-            if(result.correct) correctCount++;
+            const res = await tian.evaluate();
+            tian.markResult(res.correct);
+            if (res.correct) correctCount++;
         }
         const total = tianInstances.length;
         const detailDiv = document.getElementById('correctionDetail');
-        detailDiv.innerHTML = `<div class="score-text">✨ 批改完成！正确 ${correctCount} / ${total}  ✨</div>
-                               <div>✅ 绿色✓表示AI匹配通过，红色✗需再练习。可点击单个「批改本格」或整体批改。</div>`;
+        detailDiv.innerHTML = `<div class="score-text">✅ 批改完成！正确 ${correctCount} / ${total}</div>
+                               <div>✓ 绿色对号表示AI匹配通过，红色叉号需再练习。</div>`;
         document.getElementById('correctionResultArea').style.display = 'block';
         updateOverallProgress();
     }
 
-    function updateOverallProgress() {
-        let reviewed = 0;
-        for(let t of tianInstances) {
-            if(t.correctStatus !== null) reviewed++;
-        }
-        const tip = document.getElementById('progressTip');
-        if(tip) tip.innerText = `${reviewed} / ${tianInstances.length} 已批改`;
-    }
-
     function resetAllHandwriting() {
-        for(let t of tianInstances) t.clear();
+        for (let t of tianInstances) t.clear();
         document.getElementById('correctionResultArea').style.display = 'none';
         updateOverallProgress();
+    }
+
+    function clearAllMarks() {
+        for (let t of tianInstances) {
+            t.removeMark();
+            t.correctStatus = null;
+        }
+        updateOverallProgress();
+    }
+
+    function updateOverallProgress() {
+        let reviewed = tianInstances.filter(t => t.correctStatus !== null).length;
+        const tip = document.getElementById('progressTip');
+        if (tip) tip.innerText = `${reviewed} / ${tianInstances.length} 已批改`;
     }
 
     function generateFromInput() {
-        let raw = document.getElementById('wordInput').value;
-        let lines = raw.split(/\r?\n/).filter(l => l.trim().length > 0);
-        // 支持顿号分隔合并行
-        let finalWords = [];
-        for(let line of lines) {
-            if(line.includes('、')) {
-                let splits = line.split(/、/);
-                for(let s of splits) if(s.trim()) finalWords.push(s.trim());
-            } else {
-                finalWords.push(line.trim());
-            }
-        }
-        if(finalWords.length === 0) {
-            alert("至少输入一个词语或汉字");
+        const raw = document.getElementById('wordInput').value;
+        const words = parseInputToWords(raw);
+        if (words.length === 0) {
+            alert("请输入至少一个词语");
             return;
         }
-        currentWordList = finalWords.map((word, idx) => ({
-            id: idx,
-            word: word,
-            pinyin: getWordPinyin(word)
-        }));
-        renderPractice(currentWordList);
+        currentItems = expandWordsToChars(words);
+        renderPractice(currentItems);
     }
 
-    // 加载示例
     function loadSample() {
-        document.getElementById('wordInput').value = `苹果、香蕉、熊猫、快乐\n学习、写字、中国、春天\n花朵、太阳、月亮、老师`;
+        document.getElementById('wordInput').value = "苹果\n香蕉\n熊猫\n快乐\n学习\n中国";
         generateFromInput();
-    }
-
-    function clearAllDrawings() {
-        for(let t of tianInstances) t.clear();
-        document.getElementById('correctionResultArea').style.display = 'none';
-        updateOverallProgress();
     }
 
     window.onload = () => {
@@ -658,11 +588,7 @@
         document.getElementById('sampleBtn').addEventListener('click', loadSample);
         document.getElementById('batchCorrectBtn').addEventListener('click', batchCorrect);
         document.getElementById('resetAllHandwritingBtn').addEventListener('click', resetAllHandwriting);
-        document.getElementById('clearDrawAllBtn').addEventListener('click', () => {
-            if(tianInstances.length) clearAllDrawings();
-            else alert("请先生成练习页面");
-        });
-        // 初始默认生成示例
+        document.getElementById('clearAllMarksBtn').addEventListener('click', clearAllMarks);
         generateFromInput();
     };
 </script>
