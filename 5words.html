@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>英语拼写练习</title>
+<style>
+body { font-family: Arial, sans-serif; padding: 20px; background-color: #f0f8ff; }
+h1 { text-align: center; color: #333; }
+.section { margin: 20px auto; max-width: 600px; padding: 20px; border-radius: 10px; background: #fff; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+.hidden { display: none; }
+button { font-size: 18px; padding: 10px 20px; margin: 5px; cursor: pointer; border: none; border-radius: 5px; }
+#play-pronunciation, #play-quiz-pronunciation { background-color: #4CAF50; color: white; }
+#next-word, #check-answer, #finish { background-color: #008CBA; color: white; }
+input, textarea { font-size: 16px; padding: 10px; width: 95%; margin-top: 10px; border-radius: 5px; border: 1px solid #ccc; }
+#feedback { font-size: 18px; margin-top: 10px; font-weight: bold; }
+.correct { color: green; }
+.wrong { color: red; }
+.stats { margin-top: 10px; font-size: 16px; }
+</style>
+</head>
+<body>
+
+<h1>英语拼写练习</h1>
+
+<!-- 输入单词列表 -->
+<div id="input-section" class="section">
+  <h2>输入学习单词</h2>
+  <p>格式: 单词,词义,词性 (每行一个)</p>
+  <textarea id="word-input" rows="8" placeholder="例如：book,书,名词"></textarea>
+  <br>
+  <button id="start-learning">开始学习</button>
+</div>
+
+<!-- 学习阶段 -->
+<div id="learning-section" class="section hidden">
+  <h2>学习阶段</h2>
+  <p id="learning-word"></p>
+  <p id="learning-meaning"></p>
+  <p id="learning-pos"></p>
+  <button id="play-pronunciation">🔊 播放发音</button>
+  <button id="next-word">下一词 ➡️</button>
+</div>
+
+<!-- 默写阶段 -->
+<div id="quiz-section" class="section hidden">
+  <h2>默写练习</h2>
+  <p id="quiz-meaning"></p>
+  <input type="text" id="quiz-input" autocomplete="off"/>
+  <br>
+  <button id="check-answer">提交 ✅</button>
+  <button id="play-quiz-pronunciation" class="hidden">🔊 播放发音</button>
+  <p id="feedback"></p>
+  <div class="stats">
+    <span>总练习次数: <span id="total-count">0</span></span> |
+    <span>正确次数: <span id="correct-count">0</span></span> |
+    <span>错误次数: <span id="wrong-count">0</span></span>
+  </div>
+</div>
+
+<!-- 完成阶段 -->
+<div id="finish-section" class="section hidden">
+  <h2>🎉 全部完成！</h2>
+  <p>你已经完成所有单词的练习。</p>
+  <button id="finish">重新开始</button>
+</div>
+
+<script>
+let words = [];
+let learningIndex = 0;
+let quizIndex = 0;
+let errorWords = [];
+let isReview = false;
+
+let totalCount = 0;
+let correctCount = 0;
+let wrongCount = 0;
+
+// DOM元素
+const inputSection = document.getElementById('input-section');
+const learningSection = document.getElementById('learning-section');
+const quizSection = document.getElementById('quiz-section');
+const finishSection = document.getElementById('finish-section');
+
+const learningWordEl = document.getElementById('learning-word');
+const learningMeaningEl = document.getElementById('learning-meaning');
+const learningPosEl = document.getElementById('learning-pos');
+
+const quizMeaningEl = document.getElementById('quiz-meaning');
+const quizInput = document.getElementById('quiz-input');
+const feedbackEl = document.getElementById('feedback');
+
+const totalCountEl = document.getElementById('total-count');
+const correctCountEl = document.getElementById('correct-count');
+const wrongCountEl = document.getElementById('wrong-count');
+
+// 播放英音
+function playPronunciation(word) {
+  const utter = new SpeechSynthesisUtterance(word);
+  utter.lang = 'en-GB';
+  speechSynthesis.speak(utter);
+}
+
+// 解析输入
+document.getElementById('start-learning').onclick = function() {
+  const inputText = document.getElementById('word-input').value.trim();
+  if (!inputText) { alert('请输入单词列表！'); return; }
+  words = inputText.split('\n').map(line => {
+    const parts = line.split(',');
+    return { word: parts[0].trim(), meaning: parts[1]?.trim()||'', pos: parts[2]?.trim()||'' };
+  });
+  inputSection.classList.add('hidden');
+  learningSection.classList.remove('hidden');
+  learningIndex = 0;
+  showLearningWord();
+};
+
+// 学习阶段
+function showLearningWord() {
+  const w = words[learningIndex];
+  learningWordEl.textContent = `单词: ${w.word}`;
+  learningMeaningEl.textContent = `意思: ${w.meaning}`;
+  learningPosEl.textContent = `词性: ${w.pos}`;
+}
+
+document.getElementById('play-pronunciation').onclick = () => {
+  playPronunciation(words[learningIndex].word);
+};
+
+document.getElementById('next-word').onclick = () => {
+  learningIndex++;
+  if (learningIndex < words.length) {
+    showLearningWord();
+  } else {
+    learningSection.classList.add('hidden');
+    quizSection.classList.remove('hidden');
+    isReview = false;
+    startQuiz(words);
+  }
+};
+
+// 默写阶段
+function startQuiz(list) {
+  quizIndex = 0;
+  if (!isReview) errorWords = [];
+  showQuizWord(list[quizIndex]);
+}
+
+function showQuizWord(wordObj) {
+  quizMeaningEl.textContent = `意思: ${wordObj.meaning}`;
+  quizInput.value = '';
+  feedbackEl.textContent = '';
+  document.getElementById('play-quiz-pronunciation').classList.add('hidden');
+  quizInput.focus();
+}
+
+document.getElementById('play-quiz-pronunciation').onclick = () => {
+  const wordObj = isReview ? errorWords[quizIndex] : words[quizIndex];
+  playPronunciation(wordObj.word);
+};
+
+document.getElementById('check-answer').onclick = () => {
+  const input = quizInput.value.trim().toLowerCase();
+  const currentWord = isReview ? errorWords[quizIndex] : words[quizIndex];
+
+  totalCount++;
+  totalCountEl.textContent = totalCount;
+
+  if (input === currentWord.word.toLowerCase()) {
+    feedbackEl.textContent = '✔️ 正确！';
+    feedbackEl.className = 'correct';
+    correctCount++;
+    correctCountEl.textContent = correctCount;
+  } else {
+    feedbackEl.textContent = '❌ 错误！';
+    feedbackEl.className = 'wrong';
+    wrongCount++;
+    wrongCountEl.textContent = wrongCount;
+    document.getElementById('play-quiz-pronunciation').classList.remove('hidden');
+    if (!isReview) errorWords.push(currentWord);
+  }
+
+  quizIndex++;
+  setTimeout(() => {
+    if (quizIndex < (isReview ? errorWords.length : words.length)) {
+      showQuizWord(isReview ? errorWords[quizIndex] : words[quizIndex]);
+    } else {
+      if (!isReview && errorWords.length > 0) {
+        alert('让我们先学习错误单词！');
+        isReview = true;
+        words = errorWords;
+        learningIndex = 0;
+        quizSection.classList.add('hidden');
+        learningSection.classList.remove('hidden');
+        showLearningWord();
+      } else {
+        quizSection.classList.add('hidden');
+        finishSection.classList.remove('hidden');
+      }
+    }
+  }, 700);
+};
+
+// 完成按钮
+document.getElementById('finish').onclick = () => {
+  location.reload();
+};
+</script>
+
+</body>
+</html>
